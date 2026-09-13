@@ -1,6 +1,15 @@
 [package]
-name = "dnd-m8-core"
-version = "0.1.0"
-edition = "2024"
+name                = "dnd-m8-core"
+description         = "D&D Mate backend core API"
+version.workspace   = true
+authors.workspace   = true
+edition.workspace   = true
+license.workspace   = true
 
 [dependencies]
+
+[dev-dependencies]
+pretty_assertions.workspace = true
+
+[package.metadata.cargo-udeps.ignore]
+development = ["criterion", "pretty_assertions"]
