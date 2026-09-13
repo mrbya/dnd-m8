@@ -114,7 +114,7 @@ test-cov:
 # A thorough frontend source check ran before running commits and ci-builds.
 thorough-check-js:
     @just fmt-js-check
-    # @just check-js
+    @just check-js
     @just check-js-eslint
     @just audit-rs
     @just unused-js
