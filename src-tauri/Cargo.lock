@@ -825,15 +825,24 @@ dependencies = [
 
 [[package]]
 name = "dnd-m8-core"
-version = "0.1.0"
+version = "0.0.1"
+dependencies = [
+ "pretty_assertions",
+]
 
 [[package]]
 name = "dnd-m8-ruleset"
-version = "0.1.0"
+version = "0.0.1"
+dependencies = [
+ "pretty_assertions",
+]
 
 [[package]]
 name = "dnd-m8-srd5-2-1"
-version = "0.1.0"
+version = "0.0.1"
+dependencies = [
+ "pretty_assertions",
+]
 
 [[package]]
 name = "dom_query"

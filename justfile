@@ -168,6 +168,22 @@ build:
 build-windows:
     cargo tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc
 
+# Generate SBOM for js/ts/svelte sources.
+sbom-js:
+    mkdir -p sbom
+    pnpm sbom --sbom-format spdx --prod > sbom/sbom-frontend.json
+
+# Generate SBOM for rs sources.
+[working-directory: 'src-tauri']
+sbom-rs:
+    mkdir -p ../sbom
+    cargo sbom > ../sbom/sbom-backend.json
+
+# Generates SBOM for all sources.
+sbom:
+    @just sbom-js
+    @just sbom-rs
+
 # Initializes the project by installing all necessary tooling. Should be run once before beginning of development.
 init:
     echo # installing nightly, windows-msvc target and xwin
