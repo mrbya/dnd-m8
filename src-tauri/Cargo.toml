@@ -30,9 +30,11 @@ dnd-m8-ruleset                  = { path = "crates/dnd-m8-ruleset" }
 dnd-m8-srd5-2-1                = { path = "crates/rulesets/dnd-m8-srd5-2-1" }
 # Runtime deps
 tauri                           = { version = "2", features = [] }
-tauri-plugin-opener             = "2"
+tauri-plugin-opener             = { version = "2" }
 serde                           = { version = "1", features = ["derive"] }
-serde_json                      = "1"
+serde_json                      = { version = "1" }
+semver                          = { version = "1" }
+thiserror                       = { version = "2" }
 # Dev deps
 pretty_assertions               = { version = "1" }
 

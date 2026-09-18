@@ -835,6 +835,9 @@ name = "dnd-m8-ruleset"
 version = "0.0.1"
 dependencies = [
  "pretty_assertions",
+ "semver",
+ "serde_json",
+ "thiserror 2.0.20",
 ]
 
 [[package]]
