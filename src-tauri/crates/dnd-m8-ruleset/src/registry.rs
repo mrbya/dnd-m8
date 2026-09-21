@@ -18,7 +18,7 @@ pub trait Ruleset: Send + Sync {
     ///
     /// Returns [`RulesetError`] when the schema or payload cannot be
     /// interpreted by this ruleset.
-    fn sumarize_character(
+    fn summarize_character(
         &self,
         character: &RulesetCharacterData,
     ) -> RulesetResult<CharacterSummary>;
@@ -114,7 +114,7 @@ mod tests {
             &self.metadata
         }
 
-        fn sumarize_character(
+        fn summarize_character(
             &self,
             _: &crate::RulesetCharacterData,
         ) -> crate::RulesetResult<CharacterSummary> {
