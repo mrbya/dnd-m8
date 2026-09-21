@@ -81,5 +81,4 @@ pub use state::AppState;
 
 /// Test helpers.
 #[cfg(test)]
-#[allow(dead_code)]
 mod test;

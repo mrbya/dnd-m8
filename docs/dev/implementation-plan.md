@@ -127,19 +127,19 @@ frontend-only fixture data does not satisfy this milestone.
 
 ### Ruleset API
 
-- [ ] Define `RulesetId` with an unambiguous, stable identifier.
-- [ ] Define `RulesetMetadata`.
-- [ ] Define the initial, deliberately small `Ruleset` trait.
-- [ ] Define a read-only `CharacterSummary` contract.
-- [ ] Add a tiny fake/test ruleset for tests and early integration work.
-- [ ] Document the public types and extension boundary.
+- [x] Define `RulesetId` with an unambiguous, stable identifier.
+- [x] Define `RulesetMetadata`.
+- [x] Define the initial, deliberately small `Ruleset` trait.
+- [x] Define a read-only `CharacterSummary` contract.
+- [x] Add a tiny fake/test ruleset for tests and early integration work.
+- [x] Document the public types and extension boundary.
 
 ### Application core
 
-- [ ] Define `CharacterId`.
-- [ ] Add the minimal character/application state required by the slice.
-- [ ] Add `CharacterService` for retrieving the sample character.
-- [ ] Add focused unit tests for successful and failed retrieval.
+- [x] Define `CharacterId`.
+- [x] Add the minimal character/application state required by the slice.
+- [x] Add `CharacterService` for retrieving the sample character.
+- [x] Add focused unit tests for successful and failed retrieval.
 
 ### Tauri shell
 
