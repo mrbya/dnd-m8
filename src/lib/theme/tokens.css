@@ -1,0 +1,55 @@
+:root {
+  /* Typography */
+  --font-family:
+    "JetBrainsMono Nerd Font", "JetBrains Mono", ui-monospace, monospace;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.375rem;
+  --font-size-2xl: 1.75rem;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Shape */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+
+  /* Layout */
+  --header-height: 3.5rem;
+  --content-max-width: 90rem;
+  --touch-target-size: 2.75rem;
+
+  /* Animation */
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+
+  /* Semantic colours */
+  --color-canvas: var(--ctp-base);
+  --color-shell: var(--ctp-mantle);
+  --color-surface: var(--ctp-surface-0);
+  --color-surface-hover: var(--ctp-surface-1);
+  --color-border: var(--ctp-surface-1);
+  --color-border-strong: var(--ctp-surface-2);
+
+  --color-text: var(--ctp-text);
+  --color-text-muted: var(--ctp-subtext-0);
+  --color-text-disabled: var(--ctp-overlay-0);
+
+  --color-primary: var(--ctp-mauve);
+  --color-primary-hover: var(--ctp-lavender);
+  --color-focus: var(--ctp-blue);
+
+  --color-success: var(--ctp-green);
+  --color-warning: var(--ctp-yellow);
+  --color-danger: var(--ctp-red);
+}

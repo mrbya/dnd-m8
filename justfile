@@ -116,7 +116,7 @@ thorough-check-js:
     @just fmt-js-check
     @just check-js
     @just check-js-eslint
-    @just audit-rs
+    @just audit-js
     @just unused-js
 
 # A thorough rs backend source check ran before running commits and ci-builds.
