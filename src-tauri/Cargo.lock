@@ -815,12 +815,15 @@ dependencies = [
 name = "dnd-m8"
 version = "0.0.1"
 dependencies = [
+ "dnd-m8-core",
+ "dnd-m8-ruleset",
  "pretty_assertions",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tauri-plugin-opener",
+ "thiserror 2.0.20",
 ]
 
 [[package]]

@@ -143,11 +143,11 @@ frontend-only fixture data does not satisfy this milestone.
 
 ### Tauri shell
 
-- [ ] Wire application state during startup.
-- [ ] Register the fake/test ruleset at the composition root.
-- [ ] Add a thin `get_character` command.
-- [ ] Define frontend-facing DTOs independently from domain types.
-- [ ] Translate domain/application errors at the shell boundary.
+- [x] Wire application state during startup.
+- [x] Register the fake/test ruleset at the composition root.
+- [x] Add a thin `get_character` command.
+- [x] Define frontend-facing DTOs independently from domain types.
+- [x] Translate domain/application errors at the shell boundary.
 
 ### Frontend
 
