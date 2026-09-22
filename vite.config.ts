@@ -29,26 +29,38 @@ export default defineConfig({
         expect: { requireAssertions: true },
         projects: [
             {
-                extends: "./vite.config.js",
+                extends: true,
                 test: {
                     name: "client",
                     browser: {
                         enabled: true,
                         provider: playwright(),
-                        instances: [{ browser: "chromium", headless: true }],
+                        instances: [
+                            {
+                                browser: "chromium",
+                                headless: true,
+                            },
+                        ],
                     },
-                    include: ["src/**/*.svelte.{test,spec}.{js,ts}"],
+                    include: [
+                        "src/**/*.svelte.{test,spec}.{js,ts}",
+                        "src/**/*.browser.{test,spec}.{js,ts}",
+                    ],
                     exclude: ["src/lib/server/**"],
                 },
             },
 
             {
-                extends: "./vite.config.js",
+                extends: true,
                 test: {
                     name: "server",
                     environment: "node",
                     include: ["src/**/*.{test,spec}.{js,ts}"],
-                    exclude: ["src/**/*.svelte.{test,spec}.{js,ts}"],
+                    exclude: [
+                        "src/**/*.svelte.{test,spec}.{js,ts}",
+                        "src/**/*.browser.{test,spec}.{js,ts}",
+                        "src/lib/server/**",
+                    ],
                 },
             },
         ],
