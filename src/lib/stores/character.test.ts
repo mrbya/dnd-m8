@@ -1,6 +1,6 @@
 import type { CharacterSummaryDto, CommandError } from "$lib/types";
 import { describe, expect, it, vi } from "vitest";
-import { CharacterStore, type CharacterLoader } from "./caracter.svelte";
+import { CharacterStore, type CharacterLoader } from "./character.svelte";
 
 const characterFixture: CharacterSummaryDto = {
   id: "10000000-0000-0000-0000-000000000001",

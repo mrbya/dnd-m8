@@ -2,7 +2,7 @@
   import {
     CharacterStore,
     type CharacterState,
-  } from "$lib/stores/caracter.svelte";
+  } from "$lib/stores/character.svelte";
   import { onMount } from "svelte";
   import CharacterOverview from "$lib/components/views/CharacterOverview.svelte";
 
@@ -51,15 +51,49 @@
       </section>
     {:else}
       <section class="shell-state" aria-label="Loading character">
-        <span class="loading-indicator" aria-hidden="true">
-          <p>Loading character...</p>
-        </span>
+        <span class="loading-indicator" aria-hidden="true"></span>
+        <p>Loading character…</p>
       </section>
     {/if}
   </main>
 </div>
 
 <style>
+  .app-shell {
+    display: grid;
+    grid-template-rows: var(--header-height) minmax(0, 1fr);
+    width: 100%;
+    height: 100dvh;
+    background: var(--color-canvas);
+  }
+
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-inline: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-shell);
+  }
+
+  .app-name {
+    color: var(--color-primary);
+    font-size: var(--font-size-md);
+    font-weight: 700;
+  }
+
+  .app-status {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+  }
+
+  .app-content {
+    min-height: 0;
+    overflow: auto;
+    padding: clamp(var(--space-4), 4vw, var(--space-8));
+  }
+
   .shell-state {
     display: grid;
     justify-items: start;

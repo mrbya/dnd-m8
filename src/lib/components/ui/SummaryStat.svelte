@@ -8,7 +8,7 @@
   let { label, value, suffix }: Props = $props();
 </script>
 
-<div class="summary-stat">
+<dl class="summary-stat">
   <dt>{label}</dt>
 
   <dd>
@@ -18,10 +18,11 @@
       <span>{suffix}</span>
     {/if}
   </dd>
-</div>
+</dl>
 
 <style>
   .summary-stat {
+    margin: 0;
     min-width: 0;
     padding: var(--space-4);
     border: 1px solid var(--color-border);

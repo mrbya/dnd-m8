@@ -32,22 +32,22 @@
         {character.currentHitPoints}
         <span>/ {character.maxHitPoints}</span>
       </p>
-
-      <progress
-        aria-label="Current hit points"
-        max={Math.max(character.maxHitPoints, 1)}
-        value={boundedHitPoints}
-      >
-        {boundedHitPoints} of {character.maxHitPoints}
-      </progress>
     </div>
+
+    <progress
+      aria-label="Current hit points"
+      max={Math.max(character.maxHitPoints, 1)}
+      value={boundedHitPoints}
+    >
+      {boundedHitPoints} of {character.maxHitPoints}
+    </progress>
   </section>
 
-  <dl class="stat-grid" aria-label="character statistics">
+  <div class="stat-grid">
     <SummaryStat label="Armor Class" value={character.armorClass} />
     <SummaryStat label="Proficiency" value={`+${character.proficiencyBonus}`} />
     <SummaryStat label="Speed" value={character.speed} suffix="ft" />
-  </dl>
+  </div>
 </article>
 
 <style>
