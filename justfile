@@ -146,6 +146,16 @@ ci:
     @just ci-js
     @just ci-rs
 
+# Runs pre-commit checks for js/ts/svelte sources.
+pre-commit-js:
+    @just fmt-js
+    @just ci-js
+
+# Runs pre-commit checks for rs sources.
+pre-commit-rs:
+    @just fmt-rs
+    @just ci-rs
+
 # Runs formating, tests and checks necessary before a commit.
 pre-commit:
     @just fmt
