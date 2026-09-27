@@ -21,9 +21,9 @@
 </dl>
 
 <style>
-  .summary-stat {
-    margin: 0;
+  dl.summary-stat {
     min-width: 0;
+    margin: 0;
     padding: var(--space-4);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
