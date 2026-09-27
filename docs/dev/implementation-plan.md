@@ -151,19 +151,19 @@ frontend-only fixture data does not satisfy this milestone.
 
 ### Frontend
 
-- [ ] Add a typed Tauri client wrapper.
-- [ ] Load a character through the Tauri command.
-- [ ] Render name, level, class, current/max HP, AC, proficiency bonus, and speed.
-- [ ] Represent loading, success, and error states.
-- [ ] Add focused tests for the client boundary and rendered states.
+- [x] Add a typed Tauri client wrapper.
+- [x] Load a character through the Tauri command.
+- [x] Render name, level, class, current/max HP, AC, proficiency bonus, and speed.
+- [x] Represent loading, success, and error states.
+- [x] Add focused tests for the client boundary and rendered states.
 
 ### Acceptance criteria
 
-- [ ] Launching the application displays Rust-owned sample-character data.
-- [ ] No concrete SRD 5.2.1 model is required for the sample.
-- [ ] The Tauri command contains orchestration only, not D&D business logic.
-- [ ] The fake ruleset can be replaced without changing the frontend contract.
-- [ ] All project quality gates pass.
+- [x] Launching the application displays Rust-owned sample-character data.
+- [x] No concrete SRD 5.2.1 model is required for the sample.
+- [x] The Tauri command contains orchestration only, not D&D business logic.
+- [x] The fake ruleset can be replaced without changing the frontend contract.
+- [x] All project quality gates pass.
 
 ### Explicitly deferred
 
