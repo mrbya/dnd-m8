@@ -1,6 +1,5 @@
 <script module lang="ts">
   export type BadgeSize = "small" | "medium";
-
   export type BadgeTone =
     "neutral" | "primary" | "success" | "warning" | "danger";
 </script>

@@ -1,6 +1,5 @@
 <script module lang="ts">
   export type CardElement = "article" | "aside" | "div" | "section";
-
   export type CardPadding = "none" | "small" | "medium" | "large";
 </script>
 

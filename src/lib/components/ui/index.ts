@@ -14,9 +14,13 @@ export { default as IconButton } from "./IconButton.svelte";
 export { default as Card } from "./Card.svelte";
 export type { CardElement, CardPadding } from "./Card.svelte";
 
-/// ProgressBar
+// ProgressBar
 export { default as ProgressBar } from "./ProgressBar.svelte";
 export type { ProgressBarTone } from "./ProgressBar.svelte";
+
+// ResourcePips
+export { default as ResourcePips } from "./ResourcePips.svelte";
+export type { ResourcePipsSize, ResourcePipsTone } from "./ResourcePips.svelte";
 
 /// SummaryStat
 export { default as SummaryStat } from "./SummaryStat.svelte";
