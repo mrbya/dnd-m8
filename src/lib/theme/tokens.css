@@ -34,22 +34,22 @@
   --duration-normal: 200ms;
 
   /* Semantic colours */
-  --color-canvas: var(--ctp-base);
-  --color-shell: var(--ctp-mantle);
-  --color-surface: var(--ctp-surface-0);
-  --color-surface-hover: var(--ctp-surface-1);
-  --color-border: var(--ctp-surface-1);
-  --color-border-strong: var(--ctp-surface-2);
-
-  --color-text: var(--ctp-text);
-  --color-text-muted: var(--ctp-subtext-0);
-  --color-text-disabled: var(--ctp-overlay-0);
-
   --color-primary: var(--ctp-mauve);
-  --color-primary-hover: var(--ctp-lavender);
+  --color-primary-hover: color-mix(
+    in srgb,
+    var(--color-primary) 82%,
+    var(--color-text)
+  );
   --color-focus: var(--ctp-blue);
 
   --color-success: var(--ctp-green);
   --color-warning: var(--ctp-yellow);
   --color-danger: var(--ctp-red);
+  --color-danger-hover: color-mix(
+    in srgb,
+    var(--color-danger) 82%,
+    var(--color-text)
+  );
+
+  --color-text-on-accent: var(--ctp-base);
 }

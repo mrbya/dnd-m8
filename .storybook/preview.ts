@@ -2,6 +2,7 @@ import { withThemeByDataAttribute } from "@storybook/addon-themes";
 import type { Preview, Renderer } from "@storybook/sveltekit";
 
 import "../src/app.css";
+import "./preview.css";
 
 const preview = {
     decorators: [

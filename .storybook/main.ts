@@ -10,6 +10,7 @@ const config = {
         "@storybook/addon-a11y",
         "@storybook/addon-vitest",
         "@storybook/addon-themes",
+        "@storybook/addon-svelte-csf",
     ],
     framework: {
         name: "@storybook/sveltekit",
