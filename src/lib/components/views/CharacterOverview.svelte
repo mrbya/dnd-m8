@@ -1,16 +1,12 @@
 <script lang="ts">
   import type { CharacterSummaryDto } from "$lib/types";
-  import { SummaryStat, ProgressBar } from "$lib/components/ui";
+  import { SummaryStat, ProgressBar, Card } from "$lib/components/ui";
 
   interface Props {
     character: CharacterSummaryDto;
   }
 
   let { character }: Props = $props();
-
-  // let boundedHitPoints = $derived(
-  //   Math.max(0, Math.min(character.currentHitPoints, character.maxHitPoints)),
-  // );
 </script>
 
 <article class="character-overview" aria-labelledby="character-name">
@@ -24,23 +20,25 @@
     </div>
   </header>
 
-  <section class="hit-points" aria-labelledby="hit-points-title">
-    <div class="hit-points-header">
-      <p id="hit-points-title">Hit points</p>
+  <Card as="section" aria-labelledby="hit-points-title" padding="medium">
+    <div class="hit-points">
+      <div class="hit-points-header">
+        <p id="hit-points-title">Hit points</p>
 
-      <p class="hit-points-value">
-        {character.currentHitPoints}
-        <span>/ {character.maxHitPoints}</span>
-      </p>
+        <p class="hit-points-value">
+          {character.currentHitPoints}
+          <span>/ {character.maxHitPoints}</span>
+        </p>
+      </div>
+
+      <ProgressBar
+        label="Current hit points"
+        max={character.maxHitPoints}
+        tone="success"
+        value={character.currentHitPoints}
+      />
     </div>
-
-    <ProgressBar
-      label="Current hit points"
-      max={character.maxHitPoints}
-      tone="success"
-      value={character.currentHitPoints}
-    />
-  </section>
+  </Card>
 
   <div class="stat-grid">
     <SummaryStat label="Armor Class" value={character.armorClass} />
@@ -84,10 +82,6 @@
   .hit-points {
     display: grid;
     gap: var(--space-3);
-    padding: var(--space-5);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
   }
 
   .hit-points-header {
