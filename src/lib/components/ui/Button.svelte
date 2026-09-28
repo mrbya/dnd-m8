@@ -15,6 +15,7 @@
     class?: HTMLButtonAttributes["class"];
     disabled?: boolean;
     loading?: boolean;
+    square?: boolean;
     size?: ButtonSize;
     type?: HTMLButtonAttributes["type"];
     variant?: ButtonVariant;
@@ -25,6 +26,7 @@
     class: className,
     disabled = false,
     loading = false,
+    square = false,
     size = "medium",
     type = "button",
     variant = "primary",
@@ -39,6 +41,7 @@
     `button--${variant}`,
     `button--${size}`,
     loading && "button--loading",
+    square && "button--square",
     className,
   ]}
   {type}
@@ -73,21 +76,33 @@
   }
 
   .button--small {
-    min-height: 2.25rem;
+    --button-size: 2.25rem;
+
+    min-height: var(--button-size);
     padding-inline: var(--space-3);
     font-size: var(--font-size-xs);
   }
 
   .button--medium {
-    min-height: var(--touch-target-size);
+    --button-size: var(--touch-target-size);
+
+    min-height: var(--button-size);
     padding-inline: var(--space-4);
     font-size: var(--font-size-sm);
   }
 
   .button--large {
-    min-height: 3rem;
+    --button-size: 3rem;
+
+    min-height: var(--button-size);
     padding-inline: var(--space-5);
     font-size: var(--font-size-md);
+  }
+
+  .button--square {
+    flex: 0 0 var(--button-size);
+    width: var(--button-size);
+    padding-inline: 0;
   }
 
   .button--primary {

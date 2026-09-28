@@ -1,18 +1,21 @@
 <script module lang="ts">
-  import { Button } from "$lib/components/ui";
+  import { Settings } from "@lucide/svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
 
+  import IconButton from "$lib/components/ui/IconButton.svelte";
+
   const { Story } = defineMeta({
-    title: "ui/Button",
-    component: Button,
+    title: "ui/IconButton",
+    component: IconButton,
     tags: ["autodocs"],
     args: {
+      label: "Settings",
       size: "medium",
       type: "button",
       variant: "primary",
     },
     argTypes: {
-      children: {
+      icon: {
         table: { disable: true },
       },
       size: {
@@ -29,7 +32,7 @@
 </script>
 
 {#snippet template(args: any)}
-  <Button {...args}>Continue</Button>
+  <IconButton {...args} icon={Settings} />
 {/snippet}
 
 <Story name="Primary" />
