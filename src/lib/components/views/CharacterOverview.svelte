@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { CharacterSummaryDto } from "$lib/types";
-  import { SummaryStat } from "$lib/components/ui";
+  import { SummaryStat, ProgressBar } from "$lib/components/ui";
 
   interface Props {
     character: CharacterSummaryDto;
@@ -8,9 +8,9 @@
 
   let { character }: Props = $props();
 
-  let boundedHitPoints = $derived(
-    Math.max(0, Math.min(character.currentHitPoints, character.maxHitPoints)),
-  );
+  // let boundedHitPoints = $derived(
+  //   Math.max(0, Math.min(character.currentHitPoints, character.maxHitPoints)),
+  // );
 </script>
 
 <article class="character-overview" aria-labelledby="character-name">
@@ -34,13 +34,12 @@
       </p>
     </div>
 
-    <progress
-      aria-label="Current hit points"
-      max={Math.max(character.maxHitPoints, 1)}
-      value={boundedHitPoints}
-    >
-      {boundedHitPoints} of {character.maxHitPoints}
-    </progress>
+    <ProgressBar
+      label="Current hit points"
+      max={character.maxHitPoints}
+      tone="success"
+      value={character.currentHitPoints}
+    />
   </section>
 
   <div class="stat-grid">
@@ -118,30 +117,6 @@
   .hit-points-value span {
     color: var(--color-text-muted);
     font-size: var(--font-size-md);
-  }
-
-  progress {
-    width: 100%;
-    height: 0.75rem;
-    overflow: hidden;
-    border: 0;
-    border-radius: var(--radius-sm);
-    background: var(--color-shell);
-    accent-color: var(--color-success);
-  }
-
-  progress::-webkit-progress-bar {
-    background: var(--color-shell);
-  }
-
-  progress::-webkit-progress-value {
-    border-radius: var(--radius-sm);
-    background: var(--color-success);
-  }
-
-  progress::-moz-progress-bar {
-    border-radius: var(--radius-sm);
-    background: var(--color-success);
   }
 
   .stat-grid {
