@@ -220,8 +220,7 @@ init:
     mdbook --version || cargo binstall mdbook --no-confirm
 
     echo # Installing pnpm
-    pnpm_major=$(pnpm --version 2>/dev/null | cut -d. -f1)
-    [[ "${pnpm_major:-0}" -lt 11 ]] && npm install -g pnpm@next-11 || true
+    pnpm --version || curl -fsSL https://get.pnpm.io/install.sh | sh -
 
     echo # Synch node_modules and misc dependencies
     pnpm install
