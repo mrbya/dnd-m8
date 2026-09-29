@@ -1,4 +1,8 @@
 // Ui components.
+// Alert
+export { default as Alert } from "./Alert.svelte";
+export type { AlertTone } from "./Alert.svelte";
+
 // Badge
 export { default as Badge } from "./Badge.svelte";
 export type { BadgeSize, BadgeTone } from "./Badge.svelte";
