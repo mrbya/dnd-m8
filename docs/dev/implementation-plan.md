@@ -85,8 +85,8 @@ The following invariants apply throughout the roadmap:
 | Milestone | Outcome | Status |
 | --- | --- | --- |
 | 0. Project foundation | Tauri/Svelte workspace and quality tooling | Complete |
-| 1. Walking skeleton | Rust-owned data rendered through the full stack | Planned |
-| 2. UI foundation | Design system and reusable components | Planned |
+| 1. Walking skeleton | Rust-owned data rendered through the full stack | Complete |
+| 2. UI foundation | Design system and reusable components | Complete |
 | 3. Character-sheet shell | Responsive session-oriented application frame | Planned |
 | 4. Core character model | Ruleset-independent runtime state and operations | Planned |
 | 5. Persistence | Durable local character storage behind an abstraction | Planned |
@@ -183,26 +183,66 @@ feature screens.
 ### Scope
 
 - [x] Add and configure Storybook for Svelte components.
-- [x] Define design tokens for color, typography, spacing, radii, elevation,
-  borders, and motion.
-- [x] Define light and dark themes with accessible contrast.
-- [x] Establish responsive breakpoints and layout conventions.
-- [x] Select a consistent icon strategy.
-- [ ] Define interaction states: default, hover, focus, active, disabled,
-  loading, warning, and error.
-- [ ] Implement initial reusable primitives:
-  - [x] Button and icon button
-  - [x] Card and section card
-  - [x] Stat block
-  - [ ] Badge and condition badge
-  - [x] Progress/resource indicator
-  - [ ] Dialog and mobile sheet
-  - [ ] Empty, loading, and error states
-- [ ] Add Storybook stories for meaningful visual and responsive states.
-- [ ] Add component tests where behavior, accessibility, or state transitions
-  justify them.
-- [ ] Verify keyboard navigation, visible focus, touch targets, and screen-reader
-  labels.
+- [x] Define design tokens for colour, typography, spacing, radii, borders,
+  surfaces, layout, and motion.
+- [x] Define accessible Catppuccin Mocha and Latte themes.
+- [x] Implement persisted `system`, `light`, and `dark` theme preferences.
+- [x] Establish responsive layout conventions and minimum touch targets.
+- [x] Use Lucide as the application icon strategy.
+- [x] Define interaction states including default, hover, focus, active,
+  disabled, loading, warning, and error.
+- [x] Implement the initial reusable primitives:
+  - [x] `Button`
+  - [x] `IconButton`
+  - [x] `Card`
+  - [x] `SummaryStat`
+  - [x] `Badge`
+  - [x] `ProgressBar`
+  - [x] `ResourcePips`
+  - [x] `Alert`
+  - [x] `Skeleton`
+- [x] Implement a representative character-overview loading skeleton.
+- [x] Add Storybook stories for meaningful visual, semantic, responsive, and
+  edge-case states.
+- [x] Add Storybook foundation stories documenting the design-token system.
+- [x] Run Storybook accessibility tests under both Mocha and Latte.
+- [x] Add focused behavioral contracts for loading buttons, icon-button
+  labelling, progress normalization, and resource-meter semantics.
+- [x] Establish global focus, reduced-motion, and visually-hidden accessibility
+  behavior.
+- [x] Verify keyboard focus, touch targets, screen-reader labels, and semantic
+  component markup.
+
+### Explicitly deferred
+
+The following primitives will be implemented just in time against their first
+real workflow rather than designed speculatively:
+
+- Dialogs and mobile sheets. Their first consumer must define focus trapping,
+  initial focus, focus restoration, Escape behavior, background inertness,
+  scroll locking, and responsive presentation.
+- Inputs, selects, checkboxes, toggles, and other form controls. Their APIs
+  should emerge from settings and character-editing requirements.
+- Tooltips. Add them only when an interface contains supplemental information
+  that cannot be communicated adequately through visible labels or accessible
+  names.
+- Desktop and mobile navigation primitives. These belong to Milestone 3 and
+  should follow the character-sheet information architecture.
+- Theme-preference controls. The theme state exists, but its UI belongs in the
+  Milestone 3 application shell.
+- Generic empty-state components. Implement these when the first data-backed
+  collection or feature workflow establishes the required actions and content.
+
+### Acceptance criteria
+
+- [x] Existing views can be composed primarily from documented primitives.
+- [x] Components adapt to narrow and wide viewport widths.
+- [x] Light and dark themes are visually coherent and pass automated
+  accessibility checks.
+- [x] Storybook provides an efficient component-development and review loop.
+- [x] Meaningful component behavior is covered without testing implementation
+  details.
+- [x] All project quality gates pass.
 
 ### Acceptance criteria
 
@@ -565,7 +605,7 @@ evidence:
 | 2026-09-13 | Treat `dnd-m8-ruleset` as an API/SDK, not a concrete-ruleset consumer. | Concrete rulesets must depend on the API, preventing a circular dependency and enabling third-party implementations. |
 | 2026-09-13 | Compose concrete rulesets in `src-tauri`. | The application boundary is the correct place to register implementations without coupling the API or core to them. |
 | 2026-09-13 | Bring Storybook into Milestone 2. | UI component iteration is an early project risk and benefits immediately from an isolated visual workbench. |
-| 2026-09-13 | Delay full character creation until the rules and runtime models are proven. | The builder should consume established concepts instead of becoming the accidental center of the architecture. |
+| 2026-09-13 | Delay full character creation until the rules and runtime models are proven. | The builder should consume established concepts instead of becoming the accidental center of the arc| 2026-09-29 | Implement workflow-specific UI primitives just in time. | Overlays, form controls, navigation, tooltips, and empty states require concrete interaction and content requirements; implementing them against their first real consumers avoids speculative APIs and incomplete accessibility behavior. |hitecture. |
 
 ## Progress log
 
@@ -573,3 +613,4 @@ evidence:
 | --- | --- | --- |
 | 2026-09-13 | 0 | Project workspace and initial quality tooling bootstrapped. |
 | 2026-09-13 | Planning | Living implementation plan created; Milestone 1 is next. |
+| 2026-09-29 | 2 | UI foundation completed with semantic tokens, Mocha and Latte themes, reusable primitives, Storybook documentation, dual-theme accessibility testing, and focused behavioral contracts. |
