@@ -1,5 +1,6 @@
 <script module lang="ts">
   import { defineMeta } from "@storybook/addon-svelte-csf";
+  import { expect } from "storybook/test";
   import type { ComponentProps } from "svelte";
 
   import { ResourcePips } from "$lib/components/ui";
@@ -87,6 +88,16 @@
     value: 2,
     valueText: "Two of three death save failures",
   }}
+  play={async ({ canvas }) => {
+    const meter = canvas.getByRole("meter", {
+      name: "Death save failures",
+    });
+
+    await expect(meter).toHaveAttribute(
+      "aria-valuetext",
+      "Two of three death save failures",
+    );
+  }}
 />
 
 <Story
@@ -115,6 +126,16 @@
     max: 5,
     value: 8,
   }}
+  play={async ({ canvas }) => {
+    const meter = canvas.getByRole("meter", {
+      name: "Clamped resource",
+    });
+
+    await expect(meter).toHaveAttribute("aria-valuemin", "0");
+    await expect(meter).toHaveAttribute("aria-valuemax", "5");
+    await expect(meter).toHaveAttribute("aria-valuenow", "5");
+    await expect(meter).toHaveAttribute("aria-valuetext", "5 of 5 available");
+  }}
 />
 
 <Story
@@ -123,6 +144,16 @@
     label: "Clamped empty resource",
     max: 5,
     value: -2,
+  }}
+  play={async ({ canvas }) => {
+    const meter = canvas.getByRole("meter", {
+      name: "Clamped empty resource",
+    });
+
+    await expect(meter).toHaveAttribute("aria-valuemin", "0");
+    await expect(meter).toHaveAttribute("aria-valuemax", "5");
+    await expect(meter).toHaveAttribute("aria-valuenow", "0");
+    await expect(meter).toHaveAttribute("aria-valuetext", "0 of 5 available");
   }}
 />
 

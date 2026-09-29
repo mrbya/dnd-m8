@@ -1,6 +1,7 @@
 <script module lang="ts">
   import type { ComponentProps } from "svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
+  import { expect } from "storybook/test";
 
   import ProgressBar from "$lib/components/ui/ProgressBar.svelte";
 
@@ -75,6 +76,14 @@
     max: 10,
     value: 14,
   }}
+  play={async ({ canvas }) => {
+    const progress = canvas.getByRole("progressbar", {
+      name: "Clamped resource",
+    });
+
+    await expect(progress).toHaveProperty("max", 10);
+    await expect(progress).toHaveProperty("value", 10);
+  }}
 />
 
 <Story
@@ -83,6 +92,14 @@
     label: "Empty resource",
     max: 10,
     value: -4,
+  }}
+  play={async ({ canvas }) => {
+    const progress = canvas.getByRole("progressbar", {
+      name: "Empty resource",
+    });
+
+    await expect(progress).toHaveProperty("max", 10);
+    await expect(progress).toHaveProperty("value", 0);
   }}
 />
 

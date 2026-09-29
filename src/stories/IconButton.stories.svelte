@@ -1,6 +1,7 @@
 <script module lang="ts">
   import { Settings } from "@lucide/svelte";
   import { defineMeta } from "@storybook/addon-svelte-csf";
+  import { expect } from "storybook/test";
 
   import IconButton from "$lib/components/ui/IconButton.svelte";
   import type { ComponentProps } from "svelte";
@@ -36,7 +37,16 @@
   <IconButton {...args} icon={Settings} />
 {/snippet}
 
-<Story name="Primary" />
+<Story
+  name="Primary"
+  play={async ({ canvas }) => {
+    const button = canvas.getByRole("button", {
+      name: "Settings",
+    });
+
+    await expect(button).toHaveAccessibleName("Settings");
+  }}
+/>
 
 <Story name="Secondary" args={{ variant: "secondary" }} />
 

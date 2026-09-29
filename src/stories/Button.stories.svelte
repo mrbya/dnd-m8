@@ -1,7 +1,8 @@
 <script module lang="ts">
+  import type { ComponentProps } from "svelte";
   import { Button } from "$lib/components/ui";
   import { defineMeta } from "@storybook/addon-svelte-csf";
-  import type { ComponentProps } from "svelte";
+  import { expect } from "storybook/test";
 
   type ButtonProps = ComponentProps<typeof Button>;
   type ButtonArgs = Omit<ButtonProps, "children">;
@@ -47,4 +48,15 @@
 
 <Story name="Disabled" args={{ disabled: true }} />
 
-<Story name="Loading" args={{ loading: true }} />
+<Story
+  name="Loading"
+  args={{ loading: true }}
+  play={async ({ canvas }) => {
+    const button = canvas.getByRole("button", {
+      name: "Continue",
+    });
+
+    await expect(button).toBeDisabled();
+    await expect(button).toHaveAttribute("aria-busy", "true");
+  }}
+/>
