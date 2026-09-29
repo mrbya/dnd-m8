@@ -3,6 +3,10 @@
   import { defineMeta } from "@storybook/addon-svelte-csf";
 
   import IconButton from "$lib/components/ui/IconButton.svelte";
+  import type { ComponentProps } from "svelte";
+
+  type IconButtonProps = ComponentProps<typeof IconButton>;
+  type IconButtonArgs = Omit<IconButtonProps, "icon">;
 
   const { Story } = defineMeta({
     title: "ui/IconButton",
@@ -15,9 +19,6 @@
       variant: "primary",
     },
     argTypes: {
-      icon: {
-        table: { disable: true },
-      },
       size: {
         control: "select",
         options: ["small", "medium", "large"],
@@ -31,7 +32,7 @@
   });
 </script>
 
-{#snippet template(args: any)}
+{#snippet template(args: IconButtonArgs)}
   <IconButton {...args} icon={Settings} />
 {/snippet}
 

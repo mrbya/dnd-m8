@@ -1,5 +1,21 @@
 :root[data-theme="light"] {
   color-scheme: light;
+  /*
+   * Latte's subtext-0 does not meet 4.5:1 against every standard
+   * application surface. Blend it towards the primary text colour
+   * while preserving a visible hierarchy.
+   */
+  --color-text-muted: color-mix(
+    in srgb,
+    var(--color-text) 80%,
+    var(--ctp-subtext-0)
+  );
+
+  --color-primary-text: color-mix(
+    in srgb,
+    var(--color-primary) 30%,
+    var(--color-text)
+  );
 
   --ctp-base: #eff1f5;
   --ctp-mantle: #e6e9ef;
@@ -10,7 +26,7 @@
   --ctp-surface-2: #acb0be;
 
   --ctp-overlay-0: #9ca0b0;
-  --ctp-subtext-0: #6c6f85;
+  --ctp-subtext-0: #52556f;
   --ctp-text: #4c4f69;
 
   --ctp-lavender: #7287fd;

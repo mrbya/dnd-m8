@@ -126,7 +126,7 @@
 
   .button--ghost {
     background: transparent;
-    color: var(--color-primary);
+    color: var(--color-primary-text);
   }
 
   .button--ghost:not(:disabled):hover {

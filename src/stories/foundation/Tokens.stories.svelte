@@ -41,6 +41,11 @@
       tokens: [
         { label: "Primary", variable: "--color-primary" },
         { label: "Primary hover", variable: "--color-primary-hover" },
+        { label: "Primary text", variable: "--color-primary-text" },
+        {
+          label: "Primary text hover",
+          variable: "--color-primary-text-hover",
+        },
         { label: "Information", variable: "--color-info" },
         { label: "Focus", variable: "--color-focus" },
       ],
@@ -372,7 +377,7 @@
   }
 
   .eyebrow {
-    color: var(--color-primary);
+    color: var(--color-primary-text);
     font-size: var(--font-size-xs);
     font-weight: 700;
     letter-spacing: 0.08em;
