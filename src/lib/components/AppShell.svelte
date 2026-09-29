@@ -4,7 +4,10 @@
     type CharacterState,
   } from "$lib/stores/character.svelte";
   import { onMount } from "svelte";
-  import CharacterOverview from "$lib/components/views/CharacterOverview.svelte";
+  import {
+    CharacterOverview,
+    CharacterOverviewSkeleton,
+  } from "$lib/components/views";
   import { Alert, Button } from "$lib/components/ui";
 
   const characterStore = new CharacterStore();
@@ -57,10 +60,7 @@
         />
       </div>
     {:else}
-      <section class="shell-state" aria-label="Loading character">
-        <span class="loading-indicator" aria-hidden="true"></span>
-        <p>Loading character…</p>
-      </section>
+      <CharacterOverviewSkeleton />
     {/if}
   </main>
 </div>
@@ -101,43 +101,8 @@
     padding: clamp(var(--space-4), 4vw, var(--space-8));
   }
 
-  .shell-state {
-    display: grid;
-    justify-items: start;
-    gap: var(--space-3);
-    width: min(100%, 42rem);
-    margin-inline: auto;
-    padding: var(--space-6);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-  }
-
-  .shell-state p {
-    margin: 0;
-  }
-
-  .shell-state > p:not(.eyebrow) {
-    color: var(--color-text-muted);
-  }
-
-  .loading-indicator {
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 50%;
-    background: var(--color-primary);
-    animation: pulse 1.2s ease-in-out infinite;
-  }
-
   .shell-alert {
     width: min(100%, 42rem);
     margin-inline: auto;
-  }
-
-  @keyframes pulse {
-    50% {
-      opacity: 0.35;
-      transform: scale(0.8);
-    }
   }
 </style>
