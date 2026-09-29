@@ -1,6 +1,10 @@
 <script module lang="ts">
   import { Button } from "$lib/components/ui";
   import { defineMeta } from "@storybook/addon-svelte-csf";
+  import type { ComponentProps } from "svelte";
+
+  type ButtonProps = ComponentProps<typeof Button>;
+  type ButtonArgs = Omit<ButtonProps, "children">;
 
   const { Story } = defineMeta({
     title: "ui/Button",
@@ -12,9 +16,6 @@
       variant: "primary",
     },
     argTypes: {
-      children: {
-        table: { disable: true },
-      },
       size: {
         control: "select",
         options: ["small", "medium", "large"],
@@ -28,7 +29,7 @@
   });
 </script>
 
-{#snippet template(args: any)}
+{#snippet template(args: ButtonArgs)}
   <Button {...args}>Continue</Button>
 {/snippet}
 

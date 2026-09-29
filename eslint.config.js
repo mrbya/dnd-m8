@@ -19,7 +19,7 @@ export default defineConfig(
     svelte.configs.recommended,
     prettier,
     svelte.configs.prettier,
-    globalIgnores(["**/*.stories.svelte", "**/*.test.*"]),
+    // globalIgnores(["**/*.stories.svelte", "**/*.test.*"]),
     {
         languageOptions: { globals: { ...globals.browser, ...globals.node } },
         rules: {
