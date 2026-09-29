@@ -26,5 +26,9 @@ export type { ProgressBarTone } from "./ProgressBar.svelte";
 export { default as ResourcePips } from "./ResourcePips.svelte";
 export type { ResourcePipsSize, ResourcePipsTone } from "./ResourcePips.svelte";
 
+// Skeleton
+export { default as Skeleton } from "./Skeleton.svelte";
+export type { SkeletonShape } from "./Skeleton.svelte";
+
 /// SummaryStat
 export { default as SummaryStat } from "./SummaryStat.svelte";

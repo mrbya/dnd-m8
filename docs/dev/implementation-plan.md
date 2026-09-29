@@ -182,20 +182,20 @@ feature screens.
 
 ### Scope
 
-- [ ] Add and configure Storybook for Svelte components.
-- [ ] Define design tokens for color, typography, spacing, radii, elevation,
+- [x] Add and configure Storybook for Svelte components.
+- [x] Define design tokens for color, typography, spacing, radii, elevation,
   borders, and motion.
-- [ ] Define light and dark themes with accessible contrast.
-- [ ] Establish responsive breakpoints and layout conventions.
-- [ ] Select a consistent icon strategy.
+- [x] Define light and dark themes with accessible contrast.
+- [x] Establish responsive breakpoints and layout conventions.
+- [x] Select a consistent icon strategy.
 - [ ] Define interaction states: default, hover, focus, active, disabled,
   loading, warning, and error.
 - [ ] Implement initial reusable primitives:
-  - [ ] Button and icon button
-  - [ ] Card and section card
-  - [ ] Stat block
+  - [x] Button and icon button
+  - [x] Card and section card
+  - [x] Stat block
   - [ ] Badge and condition badge
-  - [ ] Progress/resource indicator
+  - [x] Progress/resource indicator
   - [ ] Dialog and mobile sheet
   - [ ] Empty, loading, and error states
 - [ ] Add Storybook stories for meaningful visual and responsive states.
