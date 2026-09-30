@@ -14,11 +14,12 @@
     CharacterOverviewSkeleton,
     SectionPlaceholder,
   } from "$lib/components/views";
+  import CharacterHeader from "./character/CharacterHeader.svelte";
   import { Alert, Button } from "$lib/components/ui";
 
   const characterStore = new CharacterStore();
 
-  let state = $derived(characterStore.state);
+  let characterState = $derived(characterStore.state);
 
   onMount(() => {
     void characterStore.load();
@@ -37,7 +38,7 @@
     }
   }
 
-  let activeView = $derived<AppViewId>("overview");
+  let activeView = $state<AppViewId>("overview");
 
   function selectView(view: AppViewId): void {
     activeView = view;
@@ -54,7 +55,7 @@
   <header class="app-header">
     <span class="app-name">D&amp;D Mate</span>
     <span class="app-status" aria-live="polite">
-      {statusLabel(state)}
+      {statusLabel(characterState)}
     </span>
   </header>
 
@@ -62,18 +63,22 @@
     <DesktopNavigation {activeView} onSelect={selectView} />
   </aside>
 
-  <main class="app-content" aria-busy={state.status === "loading"}>
-    {#if state.status === "ready"}
-      {#if activeView === "overview"}
-        <CharacterOverview character={state.character} />
-      {:else}
-        <SectionPlaceholder view={activeView} />
-      {/if}
-    {:else if state.status === "error"}
+  <main class="app-content" aria-busy={characterState.status === "loading"}>
+    {#if characterState.status === "ready"}
+      <div class="character-workspace">
+        <CharacterHeader character={characterState.character} />
+
+        {#if activeView === "overview"}
+          <CharacterOverview character={characterState.character} />
+        {:else}
+          <SectionPlaceholder view={activeView} />
+        {/if}
+      </div>
+    {:else if characterState.status === "error"}
       <div class="shell-alert">
         <Alert
           actions={retryCharacterLoad}
-          description={state.error.message}
+          description={characterState.error.message}
           role="alert"
           title="Unable to load character"
           tone="danger"
@@ -136,6 +141,13 @@
 
   .shell-alert {
     width: min(100%, 42rem);
+    margin-inline: auto;
+  }
+
+  .character-workspace {
+    display: grid;
+    gap: var(--space-5);
+    width: min(100%, 48rem);
     margin-inline: auto;
   }
 

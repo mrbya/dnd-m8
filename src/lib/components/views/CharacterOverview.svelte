@@ -9,17 +9,8 @@
   let { character }: Props = $props();
 </script>
 
-<article class="character-overview" aria-labelledby="character-name">
-  <header class="character-header">
-    <div>
-      <p class="eyebrow">Active character</p>
-      <h1 id="character-name">{character.name}</h1>
-      <p class="character-description">
-        Level {character.level} · {character.className}
-      </p>
-    </div>
-  </header>
-
+<section class="character-overview" aria-labelledby="overview-title">
+  <h2 id="overview-title" class="visually-hidden">Overview</h2>
   <Card as="section" aria-labelledby="hit-points-title" padding="medium">
     <div class="hit-points">
       <div class="hit-points-header">
@@ -45,38 +36,12 @@
     <SummaryStat label="Proficiency" value={`+${character.proficiencyBonus}`} />
     <SummaryStat label="Speed" value={character.speed} suffix="ft" />
   </div>
-</article>
+</section>
 
 <style>
   .character-overview {
     display: grid;
     gap: var(--space-5);
-    width: min(100%, 48rem);
-    margin-inline: auto;
-  }
-
-  .character-header {
-    padding-block: var(--space-2);
-  }
-
-  .eyebrow {
-    margin: 0;
-    color: var(--color-primary-text);
-    font-size: var(--font-size-xs);
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  h1 {
-    margin: var(--space-2) 0 var(--space-1);
-    font-size: clamp(var(--font-size-2xl), 6vw, 2.5rem);
-    line-height: 1.15;
-  }
-
-  .character-description {
-    margin: 0;
-    color: var(--color-text-muted);
   }
 
   .hit-points {

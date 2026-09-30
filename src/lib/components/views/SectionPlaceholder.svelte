@@ -52,7 +52,7 @@
 >
   <p class="section-placeholder__eyebrow">{content.eyebrow}</p>
 
-  <h1 id="section-placeholder-title">{content.title}</h1>
+  <h2 id="section-placeholder-title">{content.title}</h2>
 
   <p class="section-placeholder__description">
     {content.description}
@@ -74,13 +74,6 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-  }
-
-  h1 {
-    margin: 0;
-    color: var(--color-text);
-    font-size: var(--font-size-2xl);
-    line-height: 1.2;
   }
 
   .section-placeholder__description {

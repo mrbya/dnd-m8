@@ -244,14 +244,6 @@ real workflow rather than designed speculatively:
   details.
 - [x] All project quality gates pass.
 
-### Acceptance criteria
-
-- [ ] Feature screens can be composed primarily from documented primitives.
-- [ ] Components work at phone, tablet, and desktop widths.
-- [ ] Light and dark themes are visually coherent and accessible.
-- [ ] Storybook provides an efficient UI review loop.
-- [ ] All project quality gates pass.
-
 ## Milestone 3 — Character-sheet shell
 
 ### Goal
