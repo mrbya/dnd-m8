@@ -1,7 +1,10 @@
 <script lang="ts">
   import type { CharacterSummaryDto } from "$lib/types";
   import { SummaryStat } from "$lib/components/ui";
-  import { HitPointSummary } from "$lib/components/character";
+  import {
+    HitPointSummary,
+    CurrentStateSummary,
+  } from "$lib/components/character";
 
   interface Props {
     character: CharacterSummaryDto;
@@ -16,6 +19,8 @@
     currentHitPoints={character.currentHitPoints}
     maxHitPoints={character.maxHitPoints}
   />
+
+  <CurrentStateSummary />
 
   <div class="stat-grid">
     <SummaryStat label="Armor Class" value={character.armorClass} />
