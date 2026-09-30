@@ -253,20 +253,20 @@ sample data before introducing complex rules.
 
 ### Scope
 
-- [ ] Define the primary information architecture.
-- [ ] Implement the character header and current-state summary.
-- [ ] Implement desktop navigation and layout.
-- [ ] Implement mobile bottom navigation and mobile-first layout.
-- [ ] Create the primary sections:
-  - [ ] Overview
+- [x] Define the primary information architecture.
+- [x] Implement the character header and current-state summary.
+- [x] Implement desktop navigation and layout.
+- [x] Implement mobile bottom navigation and mobile-first layout.
+- [x] Create the primary sections:
+  - [x] Overview
   - [ ] Combat
   - [ ] Spells
   - [ ] Inventory
   - [ ] Features
-- [ ] Make urgent session state visually dominant.
-- [ ] Preserve navigation context across responsive layout changes.
-- [ ] Add representative empty, loading, error, and dense-content states.
-- [ ] Test keyboard, mouse, and touch navigation.
+- [x] Make urgent session state visually dominant.
+- [x] Preserve navigation context across responsive layout changes.
+- [x] Add representative empty, loading, error, and dense-content states.
+- [x] Test keyboard, mouse, and touch navigation.
 
 ### Acceptance criteria
 
