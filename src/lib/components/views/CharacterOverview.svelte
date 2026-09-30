@@ -5,13 +5,25 @@
     HitPointSummary,
     CurrentStateSummary,
     ResourceSummary,
+    type CurrentStateItem,
+    type ResourceSummaryItem,
   } from "$lib/components/character";
 
   interface Props {
     character: CharacterSummaryDto;
+    conditions?: readonly CurrentStateItem[];
+    concentration?: string | null;
+    effects?: readonly CurrentStateItem[];
+    resources?: readonly ResourceSummaryItem[];
   }
 
-  let { character }: Props = $props();
+  let {
+    character,
+    conditions = [],
+    concentration = null,
+    effects = [],
+    resources = [],
+  }: Props = $props();
 </script>
 
 <section class="character-overview" aria-labelledby="overview-title">
@@ -21,9 +33,9 @@
     maxHitPoints={character.maxHitPoints}
   />
 
-  <CurrentStateSummary />
+  <CurrentStateSummary {conditions} {concentration} {effects} />
 
-  <ResourceSummary />
+  <ResourceSummary {resources} />
 
   <div class="stat-grid">
     <SummaryStat label="Armor Class" value={character.armorClass} />
