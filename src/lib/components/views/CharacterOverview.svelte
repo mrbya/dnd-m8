@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { CharacterSummaryDto } from "$lib/types";
-  import { SummaryStat, ProgressBar, Card } from "$lib/components/ui";
+  import { SummaryStat } from "$lib/components/ui";
+  import { HitPointSummary } from "$lib/components/character";
 
   interface Props {
     character: CharacterSummaryDto;
@@ -11,25 +12,10 @@
 
 <section class="character-overview" aria-labelledby="overview-title">
   <h2 id="overview-title" class="visually-hidden">Overview</h2>
-  <Card as="section" aria-labelledby="hit-points-title" padding="medium">
-    <div class="hit-points">
-      <div class="hit-points-header">
-        <p id="hit-points-title">Hit points</p>
-
-        <p class="hit-points-value">
-          {character.currentHitPoints}
-          <span>/ {character.maxHitPoints}</span>
-        </p>
-      </div>
-
-      <ProgressBar
-        label="Current hit points"
-        max={character.maxHitPoints}
-        tone="success"
-        value={character.currentHitPoints}
-      />
-    </div>
-  </Card>
+  <HitPointSummary
+    currentHitPoints={character.currentHitPoints}
+    maxHitPoints={character.maxHitPoints}
+  />
 
   <div class="stat-grid">
     <SummaryStat label="Armor Class" value={character.armorClass} />
@@ -42,40 +28,6 @@
   .character-overview {
     display: grid;
     gap: var(--space-5);
-  }
-
-  .hit-points {
-    display: grid;
-    gap: var(--space-3);
-  }
-
-  .hit-points-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-4);
-  }
-
-  .hit-points-header > p {
-    margin: 0;
-  }
-
-  #hit-points-title {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-
-  .hit-points-value {
-    color: var(--color-success);
-    font-size: var(--font-size-2xl);
-    font-weight: 700;
-  }
-
-  .hit-points-value span {
-    color: var(--color-text-muted);
-    font-size: var(--font-size-md);
   }
 
   .stat-grid {

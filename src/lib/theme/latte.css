@@ -17,6 +17,28 @@
     var(--color-text)
   );
 
+  /*
+   * Latte's status accents work well as fills and indicators, but require
+   * darker foreground variants when used as text on application surfaces.
+   */
+  --color-success-text: color-mix(
+    in srgb,
+    var(--color-success) 10%,
+    var(--color-text)
+  );
+
+  --color-warning-text: color-mix(
+    in srgb,
+    var(--color-warning) 10%,
+    var(--color-text)
+  );
+
+  --color-danger-text: color-mix(
+    in srgb,
+    var(--color-danger) 50%,
+    var(--color-text)
+  );
+
   --ctp-base: #eff1f5;
   --ctp-mantle: #e6e9ef;
   --ctp-crust: #dce0e8;

@@ -30,9 +30,13 @@
       description: "Semantic text colours for different levels of emphasis.",
       tokens: [
         { label: "Text", variable: "--color-text" },
+        { label: "Primary text", variable: "--color-primary-text" },
         { label: "Muted text", variable: "--color-text-muted" },
         { label: "Disabled text", variable: "--color-text-disabled" },
         { label: "Text on accent", variable: "--color-text-on-accent" },
+        { label: "Success text", variable: "--color-success-text" },
+        { label: "Warning text", variable: "--color-warning-text" },
+        { label: "Danger text", variable: "--color-danger-text" },
       ],
     },
     {
@@ -41,7 +45,6 @@
       tokens: [
         { label: "Primary", variable: "--color-primary" },
         { label: "Primary hover", variable: "--color-primary-hover" },
-        { label: "Primary text", variable: "--color-primary-text" },
         {
           label: "Primary text hover",
           variable: "--color-primary-text-hover",

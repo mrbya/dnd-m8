@@ -68,6 +68,12 @@
   --color-success: var(--ctp-green);
   --color-warning: var(--ctp-yellow);
   --color-danger: var(--ctp-red);
+
+  /* Foreground variants for status text displayed on application surfaces. */
+  --color-success-text: var(--color-success);
+  --color-warning-text: var(--color-warning);
+  --color-danger-text: var(--color-danger);
+
   --color-danger-hover: color-mix(
     in srgb,
     var(--color-danger) 82%,
