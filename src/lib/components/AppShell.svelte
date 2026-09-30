@@ -5,8 +5,14 @@
   } from "$lib/stores/character.svelte";
   import { onMount } from "svelte";
   import {
+    DesktopNavigation,
+    MobileNavigation,
+    type AppViewId,
+  } from "$lib/components/navigation";
+  import {
     CharacterOverview,
     CharacterOverviewSkeleton,
+    SectionPlaceholder,
   } from "$lib/components/views";
   import { Alert, Button } from "$lib/components/ui";
 
@@ -30,6 +36,12 @@
         return "Needs attention";
     }
   }
+
+  let activeView = $derived<AppViewId>("overview");
+
+  function selectView(view: AppViewId): void {
+    activeView = view;
+  }
 </script>
 
 {#snippet retryCharacterLoad()}
@@ -46,9 +58,17 @@
     </span>
   </header>
 
+  <aside class="desktop-navigation-region">
+    <DesktopNavigation {activeView} onSelect={selectView} />
+  </aside>
+
   <main class="app-content" aria-busy={state.status === "loading"}>
     {#if state.status === "ready"}
-      <CharacterOverview character={state.character} />
+      {#if activeView === "overview"}
+        <CharacterOverview character={state.character} />
+      {:else}
+        <SectionPlaceholder view={activeView} />
+      {/if}
     {:else if state.status === "error"}
       <div class="shell-alert">
         <Alert
@@ -63,18 +83,28 @@
       <CharacterOverviewSkeleton />
     {/if}
   </main>
+
+  <div class="mobile-navigation-region">
+    <MobileNavigation {activeView} onSelect={selectView} />
+  </div>
 </div>
 
 <style>
   .app-shell {
     display: grid;
-    grid-template-rows: var(--header-height) minmax(0, 1fr);
+    grid-template:
+      "header" var(--header-height)
+      "content" minmax(0, 1fr)
+      "mobile-navigation" auto
+      / minmax(0, 1fr);
     width: 100%;
     height: 100dvh;
+    overflow: hidden;
     background: var(--color-canvas);
   }
 
   .app-header {
+    grid-area: header;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -96,6 +126,9 @@
   }
 
   .app-content {
+    grid-area: content;
+    min-width: 0;
+    min-height: 0;
     min-height: 0;
     overflow: auto;
     padding: clamp(var(--space-4), 4vw, var(--space-8));
@@ -104,5 +137,34 @@
   .shell-alert {
     width: min(100%, 42rem);
     margin-inline: auto;
+  }
+
+  .desktop-navigation-region {
+    display: none;
+    grid-area: desktop-navigation;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .mobile-navigation-region {
+    grid-area: mobile-navigation;
+    min-width: 0;
+  }
+
+  @media (min-width: 48rem) {
+    .app-shell {
+      grid-template:
+        "header header" var(--header-height)
+        "desktop-navigation content" minmax(0, 1fr)
+        / 14rem minmax(0, 1fr);
+    }
+
+    .desktop-navigation-region {
+      display: block;
+    }
+
+    .mobile-navigation-region {
+      display: none;
+    }
   }
 </style>
