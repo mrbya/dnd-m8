@@ -4,6 +4,7 @@
   import {
     HitPointSummary,
     CurrentStateSummary,
+    ResourceSummary,
   } from "$lib/components/character";
 
   interface Props {
@@ -21,6 +22,8 @@
   />
 
   <CurrentStateSummary />
+
+  <ResourceSummary />
 
   <div class="stat-grid">
     <SummaryStat label="Armor Class" value={character.armorClass} />
