@@ -6,13 +6,18 @@
 
   interface Props {
     activeView: AppViewId;
+    navigationLabel?: string;
     onSelect: (view: AppViewId) => void;
   }
 
-  let { activeView, onSelect }: Props = $props();
+  let {
+    activeView,
+    navigationLabel = "Character sections",
+    onSelect,
+  }: Props = $props();
 </script>
 
-<nav class="desktop-navigation" aria-label="Character sections">
+<nav class="desktop-navigation" aria-label={navigationLabel}>
   <ul class="desktop-navigation__list">
     {#each appNavigationItems as item (item.id)}
       {@const Icon = item.icon}

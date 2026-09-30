@@ -14,7 +14,7 @@
     CharacterOverviewSkeleton,
     SectionPlaceholder,
   } from "$lib/components/views";
-  import CharacterHeader from "./character/CharacterHeader.svelte";
+  import { CharacterHeader } from "$lib/components/character";
   import { Alert, Button } from "$lib/components/ui";
 
   const characterStore = new CharacterStore();
@@ -133,7 +133,6 @@
   .app-content {
     grid-area: content;
     min-width: 0;
-    min-height: 0;
     min-height: 0;
     overflow: auto;
     padding: clamp(var(--space-4), 4vw, var(--space-8));

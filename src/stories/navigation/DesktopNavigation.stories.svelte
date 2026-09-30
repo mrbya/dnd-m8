@@ -57,6 +57,40 @@
   }}
 />
 
+<Story
+  name="Keyboard Navigation"
+  args={{
+    onSelect: fn(),
+  }}
+  play={async ({ args, canvas, userEvent }) => {
+    const overview = canvas.getByRole("button", {
+      name: "Overview",
+    });
+    const combat = canvas.getByRole("button", {
+      name: "Combat",
+    });
+
+    overview.focus();
+
+    await expect(overview).toHaveFocus();
+
+    await userEvent.keyboard("{Enter}");
+
+    await expect(args.onSelect).toHaveBeenLastCalledWith("overview");
+
+    await userEvent.tab();
+
+    await expect(combat).toHaveFocus();
+
+    await userEvent.keyboard("[Space]");
+
+    await expect(args.onSelect).toHaveBeenLastCalledWith("combat");
+
+    expect(overview.getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
+    expect(combat.getBoundingClientRect().height).toBeGreaterThanOrEqual(44);
+  }}
+/>
+
 <style>
   .story-frame {
     width: 15rem;

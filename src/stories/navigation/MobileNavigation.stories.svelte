@@ -57,6 +57,47 @@
   }}
 />
 
+<Story
+  name="Keyboard And Touch Targets"
+  args={{
+    onSelect: fn(),
+  }}
+  play={async ({ args, canvas, userEvent }) => {
+    const overview = canvas.getByRole("button", {
+      name: "Overview",
+    });
+    const combat = canvas.getByRole("button", {
+      name: "Combat",
+    });
+    const inventory = canvas.getByRole("button", {
+      name: "Inventory",
+    });
+
+    overview.focus();
+
+    await expect(overview).toHaveFocus();
+
+    await userEvent.keyboard("[Space]");
+
+    await expect(args.onSelect).toHaveBeenLastCalledWith("overview");
+
+    await userEvent.tab();
+
+    await expect(combat).toHaveFocus();
+
+    await userEvent.keyboard("{Enter}");
+
+    await expect(args.onSelect).toHaveBeenLastCalledWith("combat");
+
+    for (const button of [overview, combat, inventory]) {
+      const bounds = button.getBoundingClientRect();
+
+      expect(bounds.width).toBeGreaterThanOrEqual(44);
+      expect(bounds.height).toBeGreaterThanOrEqual(44);
+    }
+  }}
+/>
+
 <style>
   .story-frame {
     display: flex;
