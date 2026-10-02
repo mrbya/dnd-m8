@@ -275,8 +275,8 @@ sample data before introducing complex rules.
 - [ ] Phone portrait is usable without horizontal scrolling or miniature
   desktop controls.
 - [ ] Desktop uses the available space without harming scanability.
-- [ ] The shell does not contain ruleset-edition checks.
-- [ ] All project quality gates pass.
+- [x] The shell does not contain ruleset-edition checks.
+- [x] All project quality gates pass.
 
 ## Milestone 4 — Core character model
 
