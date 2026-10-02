@@ -40,7 +40,9 @@ impl From<Box<CoreError>> for CommandError {
             CoreError::CharacterNotFound { .. } => CommandErrorCode::CharacterNotFound,
             CoreError::DuplicateCharacter { .. } => CommandErrorCode::DuplicateCharacter,
             CoreError::RulesetNotFound { .. } => CommandErrorCode::RulesetNotFound,
-            CoreError::Ruleset { .. } => CommandErrorCode::RulesetError,
+            CoreError::Ruleset { .. } | CoreError::InvalidHitPointState { .. } => {
+                CommandErrorCode::RulesetError
+            }
         };
 
         Self {

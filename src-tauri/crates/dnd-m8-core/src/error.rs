@@ -44,4 +44,13 @@ pub enum CoreError {
         #[source]
         source: RulesetError,
     },
+
+    /// Hit-point state has current hit points above its maximum value.
+    #[error("current hit points `{current}` exceed maximum hit points `{maximum}`")]
+    InvalidHitPointState {
+        /// Current hit points supplied to the model.
+        current: u32,
+        /// Maximum hit points supplied to the model.
+        maximum: u32,
+    },
 }

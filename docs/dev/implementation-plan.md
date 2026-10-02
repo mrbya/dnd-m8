@@ -87,8 +87,8 @@ The following invariants apply throughout the roadmap:
 | 0. Project foundation | Tauri/Svelte workspace and quality tooling | Complete |
 | 1. Walking skeleton | Rust-owned data rendered through the full stack | Complete |
 | 2. UI foundation | Design system and reusable components | Complete |
-| 3. Character-sheet shell | Responsive session-oriented application frame | Planned |
-| 4. Core character model | Ruleset-independent runtime state and operations | Planned |
+| 3. Character-sheet shell | Responsive session-oriented application frame | Complete |
+| 4. Core character model | Ruleset-independent runtime state and operations | In progress |
 | 5. Persistence | Durable local character storage behind an abstraction | Planned |
 | 6. SRD 5.2.1 foundations | First representative ruleset-backed character | Planned |
 | 7. Session and combat state | Useful interactive session dashboard | Planned |
@@ -287,8 +287,10 @@ application-level operations.
 
 ### Scope
 
-- [ ] Define a versioned `RulesetRef` stored with each character.
-- [ ] Define an opaque ruleset-specific character-definition payload.
+- [x] Store the exact versioned `RulesetId` as each character's ruleset
+  reference.
+- [x] Store ruleset-specific character definitions as opaque,
+  schema-identified `RulesetCharacterData`.
 - [ ] Model the common runtime state proven necessary by earlier UI work:
   - [ ] Hit points and temporary hit points
   - [ ] Generic resource pools
@@ -598,6 +600,7 @@ evidence:
 | 2026-09-13 | Compose concrete rulesets in `src-tauri`. | The application boundary is the correct place to register implementations without coupling the API or core to them. |
 | 2026-09-13 | Bring Storybook into Milestone 2. | UI component iteration is an early project risk and benefits immediately from an isolated visual workbench. |
 | 2026-09-13 | Delay full character creation until the rules and runtime models are proven. | The builder should consume established concepts instead of becoming the accidental center of the arc| 2026-09-29 | Implement workflow-specific UI primitives just in time. | Overlays, form controls, navigation, tooltips, and empty states require concrete interaction and content requirements; implementing them against their first real consumers avoids speculative APIs and incomplete accessibility behavior. |hitecture. |
+| 2026-10-02 | Use `RulesetId` directly as the exact versioned ruleset reference. | A separate `RulesetRef` wrapper would currently carry no additional semantics and can be introduced later if the reference model grows. |
 
 ## Progress log
 

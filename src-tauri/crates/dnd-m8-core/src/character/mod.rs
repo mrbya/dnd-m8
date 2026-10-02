@@ -3,6 +3,15 @@ use std::fmt;
 use dnd_m8_ruleset::{RulesetCharacterData, RulesetId};
 use uuid::Uuid;
 
+/// Hit-point runtime state and transitions.
+mod hitpoints;
+/// Ruleset-independent character runtime state.
+mod state;
+
+// Re-exports.
+pub use hitpoints::{DamageOutcome, HealingOutcome, HitPointState};
+pub use state::CharacterState;
+
 /// Unique identifier for characters managed by the app.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct CharacterId(Uuid);
