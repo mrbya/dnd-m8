@@ -21,7 +21,6 @@ impl CharacterState {
     }
 
     /// Returns mutable hit-point state for aggregate operations.
-    #[allow(dead_code)] // TODO: remove once operations are itegrated.
     pub(crate) const fn hit_points_mut(&mut self) -> &mut HitPointState {
         &mut self.hit_points
     }

@@ -203,12 +203,12 @@ mod tests {
 
     #[test]
     fn healing_clamps_at_max_and_doesnt_alter_temporary() -> CoreResult<()> {
-        let mut hit_points = HitPointState::new(10, 15, 0)?;
+        let mut hit_points = HitPointState::new(10, 15, 4)?;
 
         let outcome = hit_points.heal(7);
 
         assert_eq!(hit_points.current(), 15);
-        assert_eq!(hit_points.temporary(), 0);
+        assert_eq!(hit_points.temporary(), 4);
         assert_eq!(
             outcome,
             HealingOutcome {

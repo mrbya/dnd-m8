@@ -68,14 +68,15 @@
 pub(crate) mod character;
 /// Core API error types.
 pub(crate) mod error;
-/// Read-only character service.
+/// Character service.
 pub(crate) mod service;
 /// App state.
 pub(crate) mod state;
 
 // Re-exports.
 pub use character::{
-    Character, CharacterId, CharacterState, DamageOutcome, HealingOutcome, HitPointState,
+    Character, CharacterId, CharacterState, CharacterSummary, DamageOutcome, HealingOutcome,
+    HitPointState,
 };
 pub use error::{CoreError, CoreResult};
 pub use service::CharacterService;

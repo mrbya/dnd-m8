@@ -292,16 +292,16 @@ application-level operations.
 - [x] Store ruleset-specific character definitions as opaque,
   schema-identified `RulesetCharacterData`.
 - [ ] Model the common runtime state proven necessary by earlier UI work:
-  - [ ] Hit points and temporary hit points
+  - [x] Hit points and temporary hit points
   - [ ] Generic resource pools
   - [ ] Active conditions
   - [ ] Active effects and durations
   - [ ] Concentration state
   - [ ] Spell-slot state, only if it is genuinely common at this boundary
 - [ ] Define application operations:
-  - [ ] Take damage
-  - [ ] Heal
-  - [ ] Grant or replace temporary hit points
+  - [x] Take damage
+  - [x] Heal
+  - [x] Grant or replace temporary hit points
   - [ ] Spend and restore a resource
   - [ ] Apply and remove a condition
   - [ ] Apply and remove an effect

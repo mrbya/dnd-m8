@@ -36,12 +36,12 @@ impl RulesetCharacterData {
     }
 }
 
-/// Read-only character data required by the walking skeleton.
+/// Ruleset-derived character information required by the application.
 ///
 /// This is a projection for application consumption, not the persistent
 /// character model.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CharacterSummary {
+pub struct RulesetCharacterSummary {
     /// Character name.
     pub name: String,
 
@@ -50,12 +50,6 @@ pub struct CharacterSummary {
 
     /// User-facing class or multiclass description.
     pub class_name: String,
-
-    /// Current hit points.
-    pub current_hit_points: i32,
-
-    /// Maximum hit points.
-    pub max_hit_points: u32,
 
     /// Current armor class.
     pub armor_class: u16,

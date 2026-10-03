@@ -1,7 +1,10 @@
-use dnd_m8_core::{AppState as CoreAppState, Character, CharacterId, CharacterService, CoreError};
+use dnd_m8_core::{
+    AppState as CoreAppState, Character, CharacterId, CharacterService, CharacterState, CoreError,
+    HitPointState,
+};
 use dnd_m8_ruleset::{
-    CharacterSummary, Ruleset, RulesetCharacterData, RulesetError, RulesetId, RulesetMetadata,
-    RulesetRegistry, RulesetResult,
+    Ruleset, RulesetCharacterData, RulesetCharacterSummary, RulesetError, RulesetId,
+    RulesetMetadata, RulesetRegistry, RulesetResult,
 };
 use serde::Deserialize;
 use serde_json::json;
@@ -58,12 +61,6 @@ struct DemoCharacter {
     /// Class description.
     class_name: String,
 
-    /// Current hit points.
-    current_hit_points: i32,
-
-    /// Maximum hit points.
-    max_hit_points: u32,
-
     /// Armor class.
     armor_class: u16,
 
@@ -82,7 +79,7 @@ impl Ruleset for DemoRuleset {
     fn summarize_character(
         &self,
         character: &RulesetCharacterData,
-    ) -> RulesetResult<CharacterSummary> {
+    ) -> RulesetResult<RulesetCharacterSummary> {
         if character.schema() != DEMO_CHARACTER_SCHEMA {
             return Err(RulesetError::Generic {
                 msg: format!("unsupported demo character schema `{}`", character.schema()),
@@ -96,12 +93,10 @@ impl Ruleset for DemoRuleset {
                 }
             })?;
 
-        Ok(CharacterSummary {
+        Ok(RulesetCharacterSummary {
             name: character.name,
             level: character.level,
             class_name: character.class_name,
-            current_hit_points: character.current_hit_points,
-            max_hit_points: character.max_hit_points,
             armor_class: character.armor_class,
             proficiency_bonus: character.proficiency_bonus,
             speed: character.speed,
@@ -123,6 +118,7 @@ pub fn build_state() -> Result<ShellState, BootstrapError> {
     registry.register(ruleset)?;
 
     let character_id = CharacterId::new();
+    let runtime_state = CharacterState::new(HitPointState::new(31, 38, 0)?);
 
     let character = Character::new(
         character_id,
@@ -133,13 +129,12 @@ pub fn build_state() -> Result<ShellState, BootstrapError> {
                 "name": "Mira Ashfall",
                 "level": 5,
                 "className": "Life Domain Cleric",
-                "currentHitPoints": 31,
-                "maxHitPoints": 38,
                 "armorClass": 18,
                 "proficiencyBonus": 3,
                 "speed": 30
             }),
         ),
+        runtime_state,
     );
 
     let mut characters = CharacterService::new(registry);

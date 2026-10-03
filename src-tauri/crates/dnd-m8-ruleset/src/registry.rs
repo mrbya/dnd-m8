@@ -4,7 +4,8 @@ use std::{
 };
 
 use crate::{
-    CharacterSummary, RulesetCharacterData, RulesetError, RulesetId, RulesetMetadata, RulesetResult,
+    RulesetCharacterData, RulesetCharacterSummary, RulesetError, RulesetId, RulesetMetadata,
+    RulesetResult,
 };
 
 /// D7D Mate contract implemented by a concrete ruleset.
@@ -21,7 +22,7 @@ pub trait Ruleset: Send + Sync {
     fn summarize_character(
         &self,
         character: &RulesetCharacterData,
-    ) -> RulesetResult<CharacterSummary>;
+    ) -> RulesetResult<RulesetCharacterSummary>;
 }
 
 /// Concrete rulesets available to an app instance.
@@ -79,12 +80,12 @@ impl RulesetRegistry {
 
 #[cfg(test)]
 mod tests {
-    use crate::{CharacterSummary, Ruleset, RulesetId, RulesetMetadata, RulesetRegistry};
+    use crate::{Ruleset, RulesetCharacterSummary, RulesetId, RulesetMetadata, RulesetRegistry};
 
     #[derive(Debug)]
     struct TestRuleset {
         metadata: RulesetMetadata,
-        summary: CharacterSummary,
+        summary: RulesetCharacterSummary,
     }
 
     impl TestRuleset {
@@ -95,12 +96,10 @@ mod tests {
                     display_name: String::from("test ruleset"),
                     description: String::from("kung foo"),
                 },
-                summary: CharacterSummary {
+                summary: RulesetCharacterSummary {
                     name: String::from("bruce lee"),
                     level: 19,
                     class_name: String::from("monk"),
-                    current_hit_points: 1,
-                    max_hit_points: 99,
                     armor_class: 18,
                     proficiency_bonus: 5,
                     speed: 30,
@@ -117,7 +116,7 @@ mod tests {
         fn summarize_character(
             &self,
             _: &crate::RulesetCharacterData,
-        ) -> crate::RulesetResult<CharacterSummary> {
+        ) -> crate::RulesetResult<RulesetCharacterSummary> {
             Ok(self.summary.clone())
         }
     }

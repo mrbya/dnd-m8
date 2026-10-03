@@ -76,7 +76,7 @@ pub(crate) mod id;
 pub(crate) mod registry;
 
 // Re-exports.
-pub use character::{CharacterSummary, RulesetCharacterData};
+pub use character::{RulesetCharacterData, RulesetCharacterSummary};
 pub use error::{RulesetError, RulesetResult};
 pub use id::{RulesetId, RulesetMetadata};
 pub use registry::{Ruleset, RulesetRegistry};

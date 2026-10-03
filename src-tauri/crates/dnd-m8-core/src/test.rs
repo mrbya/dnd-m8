@@ -1,11 +1,11 @@
 use dnd_m8_ruleset::{
-    CharacterSummary, Ruleset, RulesetCharacterData, RulesetError, RulesetId, RulesetMetadata,
-    RulesetResult,
+    Ruleset, RulesetCharacterData, RulesetCharacterSummary, RulesetError, RulesetId,
+    RulesetMetadata, RulesetResult,
 };
 use serde_json::{json, Value};
 use uuid::Uuid;
 
-use crate::{Character, CharacterId};
+use crate::{Character, CharacterId, CharacterState, CharacterSummary, CoreResult, HitPointState};
 
 /// Schema understood by [`TestRuleset`].
 pub const TEST_SCHEMA: &str = "org.dnd-m8.test.character@1";
@@ -50,7 +50,7 @@ impl Ruleset for TestRuleset {
     fn summarize_character(
         &self,
         character: &dnd_m8_ruleset::RulesetCharacterData,
-    ) -> RulesetResult<dnd_m8_ruleset::CharacterSummary> {
+    ) -> RulesetResult<RulesetCharacterSummary> {
         if character.schema() != TEST_SCHEMA {
             return Err(RulesetError::Generic {
                 msg: String::from(INVALID_SCHEMA_MESSAGE),
@@ -65,7 +65,7 @@ impl Ruleset for TestRuleset {
                 msg: String::from("test character has no valid name"),
             })?;
 
-        let mut summary = expected_summary();
+        let mut summary = expected_ruleset_summary();
         name.clone_into(&mut summary.name);
 
         Ok(summary)
@@ -73,9 +73,12 @@ impl Ruleset for TestRuleset {
 }
 
 /// Constructs a test character with the requested schema.
-#[must_use]
-pub fn test_character(id: CharacterId, ruleset_id: RulesetId, schema: &str) -> Character {
-    Character::new(
+pub fn test_character(
+    id: CharacterId,
+    ruleset_id: RulesetId,
+    schema: &str,
+) -> CoreResult<Character> {
+    Ok(Character::new(
         id,
         ruleset_id,
         RulesetCharacterData::new(
@@ -84,7 +87,8 @@ pub fn test_character(id: CharacterId, ruleset_id: RulesetId, schema: &str) -> C
                 "name": TEST_CHARACTER_NAME,
             }),
         ),
-    )
+        CharacterState::new(test_hit_points()?),
+    ))
 }
 
 /// Returns the deterministic character identifier used by tests.
@@ -93,16 +97,28 @@ pub fn test_character_id() -> CharacterId {
     CharacterId::from_uuid(Uuid::from_u128(1))
 }
 
-/// Returns the summary expected from a valid test character.
-pub fn expected_summary() -> CharacterSummary {
-    CharacterSummary {
+/// Returns the ruleset summary expected from a valid test character.
+#[must_use]
+pub fn expected_ruleset_summary() -> RulesetCharacterSummary {
+    RulesetCharacterSummary {
         name: String::from(TEST_CHARACTER_NAME),
         level: 19,
         class_name: String::from("Monk"),
-        current_hit_points: 1,
-        max_hit_points: 99,
         armor_class: 18,
         proficiency_bonus: 6,
         speed: 30,
     }
+}
+
+/// Returns the validated runtime hit points used by test characters.
+pub fn test_hit_points() -> CoreResult<HitPointState> {
+    HitPointState::new(1, 99, 7)
+}
+
+/// Returns the combined summary expected from a valid test character.
+pub fn expected_summary() -> CoreResult<CharacterSummary> {
+    Ok(CharacterSummary::from_ruleset(
+        expected_ruleset_summary(),
+        &test_hit_points()?,
+    ))
 }

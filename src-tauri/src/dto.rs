@@ -1,5 +1,4 @@
-use dnd_m8_core::CharacterId;
-use dnd_m8_ruleset::CharacterSummary;
+use dnd_m8_core::{CharacterId, CharacterSummary};
 use serde::Serialize;
 
 /// Serializable character summary returned to the frontend.
@@ -19,7 +18,7 @@ pub struct CharacterSummaryDto {
     pub class_name: String,
 
     /// Current hit points.
-    pub current_hit_points: i32,
+    pub current_hit_points: u32,
 
     /// Maximum hit points.
     pub max_hit_points: u32,

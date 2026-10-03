@@ -7,10 +7,13 @@ use uuid::Uuid;
 mod hitpoints;
 /// Ruleset-independent character runtime state.
 mod state;
+/// Combined character read model.
+mod summary;
 
 // Re-exports.
 pub use hitpoints::{DamageOutcome, HealingOutcome, HitPointState};
 pub use state::CharacterState;
+pub use summary::CharacterSummary;
 
 /// Unique identifier for characters managed by the app.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -57,6 +60,8 @@ pub struct Character {
     ruleset_id: RulesetId,
     /// Ruleset character data.
     ruleset_data: RulesetCharacterData,
+    /// Ruleset-independent runtime state.
+    state: CharacterState,
 }
 
 impl Character {
@@ -66,11 +71,13 @@ impl Character {
         id: CharacterId,
         ruleset_id: RulesetId,
         ruleset_data: RulesetCharacterData,
+        state: CharacterState,
     ) -> Self {
         Self {
             id,
             ruleset_id,
             ruleset_data,
+            state,
         }
     }
 
@@ -90,6 +97,30 @@ impl Character {
     #[must_use]
     pub const fn ruleset_data(&self) -> &RulesetCharacterData {
         &self.ruleset_data
+    }
+
+    /// Returns ruleset-independent runtime state.
+    #[must_use]
+    pub const fn state(&self) -> &CharacterState {
+        &self.state
+    }
+
+    /// Applies damage to the character's hit points.
+    #[must_use]
+    pub fn take_damage(&mut self, amount: u32) -> DamageOutcome {
+        self.state.hit_points_mut().take_damage(amount)
+    }
+
+    /// Restores the character's ordinary hit points.
+    #[must_use]
+    pub fn heal(&mut self, amount: u32) -> HealingOutcome {
+        self.state.hit_points_mut().heal(amount)
+    }
+
+    /// Replaces temporary hit points and returns their previous amount.
+    #[must_use]
+    pub const fn replace_temporary_hit_points(&mut self, amount: u32) -> u32 {
+        self.state.hit_points_mut().replace_temporary(amount)
     }
 }
 

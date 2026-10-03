@@ -46,12 +46,12 @@ mod tests {
         let character_id = test_character_id();
         let mut service = CharacterService::new(registry);
 
-        service.add_character(test_character(character_id, ruleset_id, TEST_SCHEMA))?;
+        service.add_character(test_character(character_id, ruleset_id, TEST_SCHEMA)?)?;
 
         let state = AppState::new(service);
         let summary = state.characters().summarize_character(character_id)?;
 
-        assert_eq!(summary, expected_summary());
+        assert_eq!(summary, expected_summary()?);
 
         Ok(())
     }
