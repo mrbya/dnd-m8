@@ -1,4 +1,7 @@
-use dnd_m8_core::CoreError;
+use dnd_m8_core::CoreError::{
+    self, DuplicateResource, EmptyResourceId, InsufficientResource, InvalidResourcePool,
+    ResourceNotFound,
+};
 use serde::Serialize;
 use thiserror::Error;
 
@@ -40,9 +43,13 @@ impl From<Box<CoreError>> for CommandError {
             CoreError::CharacterNotFound { .. } => CommandErrorCode::CharacterNotFound,
             CoreError::DuplicateCharacter { .. } => CommandErrorCode::DuplicateCharacter,
             CoreError::RulesetNotFound { .. } => CommandErrorCode::RulesetNotFound,
-            CoreError::Ruleset { .. } | CoreError::InvalidHitPointState { .. } => {
-                CommandErrorCode::RulesetError
-            }
+            CoreError::Ruleset { .. }
+            | CoreError::InvalidHitPointState { .. }
+            | EmptyResourceId
+            | InvalidResourcePool { .. }
+            | DuplicateResource { .. }
+            | ResourceNotFound { .. }
+            | InsufficientResource { .. } => CommandErrorCode::RulesetError,
         };
 
         Self {

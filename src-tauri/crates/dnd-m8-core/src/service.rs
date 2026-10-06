@@ -4,6 +4,7 @@ use dnd_m8_ruleset::RulesetRegistry;
 
 use crate::{
     Character, CharacterId, CharacterSummary, CoreError, CoreResult, DamageOutcome, HealingOutcome,
+    ResourceId, ResourceRestoreOutcome, ResourceSpendOutcome,
 };
 
 /// Provides application operations to manage characters.
@@ -132,6 +133,40 @@ impl CharacterService {
         Ok(self
             .character_mut(character_id)?
             .replace_temporary_hit_points(amount))
+    }
+
+    /// Spends a resource belonging to a managed character.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the character or resource is unavailable, or when
+    /// the resource does not contain the requested amount.
+    pub fn spend_resource(
+        &mut self,
+        character_id: CharacterId,
+        resource_id: &ResourceId,
+        amount: u32,
+    ) -> CoreResult<ResourceSpendOutcome> {
+        self.character_mut(character_id)?
+            .spend_resource(resource_id, amount)
+    }
+
+    /// Restores a resource belonging to a managed character.
+    ///
+    /// Restoration behavior such as short-rest or long-rest recovery is determined
+    /// by the ruleset; this operation only applies an explicit amount.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the character or resource is unavailable.
+    pub fn restore_resource(
+        &mut self,
+        character_id: CharacterId,
+        resource_id: &ResourceId,
+        amount: u32,
+    ) -> CoreResult<ResourceRestoreOutcome> {
+        self.character_mut(character_id)?
+            .restore_resource(resource_id, amount)
     }
 }
 

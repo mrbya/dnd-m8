@@ -5,6 +5,8 @@ use uuid::Uuid;
 
 /// Hit-point runtime state and transitions.
 mod hitpoints;
+/// Generic limited-resource runtime state.
+mod resources;
 /// Ruleset-independent character runtime state.
 mod state;
 /// Combined character read model.
@@ -12,8 +14,13 @@ mod summary;
 
 // Re-exports.
 pub use hitpoints::{DamageOutcome, HealingOutcome, HitPointState};
+pub use resources::{
+    ResourceId, ResourcePool, ResourcePools, ResourceRestoreOutcome, ResourceSpendOutcome,
+};
 pub use state::CharacterState;
 pub use summary::CharacterSummary;
+
+use crate::CoreResult;
 
 /// Unique identifier for characters managed by the app.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -121,6 +128,32 @@ impl Character {
     #[must_use]
     pub const fn replace_temporary_hit_points(&mut self, amount: u32) -> u32 {
         self.state.hit_points_mut().replace_temporary(amount)
+    }
+
+    /// Spends one of this character's resources.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the resource is missing or insufficient.
+    pub fn spend_resource(
+        &mut self,
+        id: &ResourceId,
+        amount: u32,
+    ) -> CoreResult<ResourceSpendOutcome> {
+        self.state.resources_mut().spend(id, amount)
+    }
+
+    /// Restores one of this character's resources.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the resource is missing.
+    pub fn restore_resource(
+        &mut self,
+        id: &ResourceId,
+        amount: u32,
+    ) -> CoreResult<ResourceRestoreOutcome> {
+        self.state.resources_mut().restore(id, amount)
     }
 }
 

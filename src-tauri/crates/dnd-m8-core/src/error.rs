@@ -1,7 +1,7 @@
 use dnd_m8_ruleset::{RulesetError, RulesetId};
 use thiserror::Error;
 
-use crate::CharacterId;
+use crate::{CharacterId, ResourceId};
 
 /// Result type alias used by core API.
 pub type CoreResult<T> = std::result::Result<T, Box<CoreError>>;
@@ -52,5 +52,45 @@ pub enum CoreError {
         current: u32,
         /// Maximum hit points supplied to the model.
         maximum: u32,
+    },
+
+    /// A resource indentifier was empty.
+    #[error("resource identifier cannot be empty")]
+    EmptyResourceId,
+
+    /// Resource state has a current value above its maximum.
+    #[error("resource `{id}` has current value `{current}` above maximum `{maximum}`")]
+    InvalidResourcePool {
+        /// Stable resource identifier.
+        id: ResourceId,
+        /// Current value supplied to the model.
+        current: u32,
+        /// Maximum value supplied to the model.
+        maximum: u32,
+    },
+
+    /// The character contains multiple resources with the same identifier.
+    #[error("resource `{id}` is already present")]
+    DuplicateResource {
+        /// Duplicate resource identifier.
+        id: ResourceId,
+    },
+
+    /// The requested resource does not exist.
+    #[error("resource `{id}` was not found")]
+    ResourceNotFound {
+        /// Missing resource identifier.
+        id: ResourceId,
+    },
+
+    /// The resource does not have enough remaining uses.
+    #[error("resourde `{id}` has only `{available}` available, but `{requested}` was requested")]
+    InsufficientResource {
+        /// Missing resource identifier.
+        id: ResourceId,
+        /// Ammount requested by the operation.
+        requested: u32,
+        /// Ammount available before the operation.
+        available: u32,
     },
 }
