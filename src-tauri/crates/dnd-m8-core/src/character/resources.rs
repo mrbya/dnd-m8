@@ -91,7 +91,7 @@ impl ResourcePool {
 
     /// Returns the current maximum ammount.
     #[must_use]
-    pub const fn maxinum(&self) -> u32 {
+    pub const fn maximum(&self) -> u32 {
         self.maximum
     }
 
@@ -274,7 +274,7 @@ mod tests {
         let resource = ResourcePool::new(ResourceId::new("zero max")?, 0, 0)?;
 
         assert_eq!(resource.current(), 0);
-        assert_eq!(resource.maxinum(), 0);
+        assert_eq!(resource.maximum(), 0);
 
         Ok(())
     }

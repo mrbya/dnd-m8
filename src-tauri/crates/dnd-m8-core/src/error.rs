@@ -1,7 +1,7 @@
 use dnd_m8_ruleset::{RulesetError, RulesetId};
 use thiserror::Error;
 
-use crate::{CharacterId, ResourceId};
+use crate::{CharacterId, ConditionApplicationId, ResourceId};
 
 /// Result type alias used by core API.
 pub type CoreResult<T> = std::result::Result<T, Box<CoreError>>;
@@ -92,5 +92,23 @@ pub enum CoreError {
         requested: u32,
         /// Ammount available before the operation.
         available: u32,
+    },
+
+    /// A condition identifier was empty.
+    #[error("condition identifier cannot be empty")]
+    EmptyConditionId,
+
+    /// A condition application with the same identifier already exists.
+    #[error("condition application `{id}` is already active")]
+    DuplicateConditionApplication {
+        /// Duplicate runtime application identifier.
+        id: ConditionApplicationId,
+    },
+
+    /// The requested condition application does not exist.
+    #[error("condition application `{id}` was not found")]
+    ConditionApplicationNotFound {
+        /// Missing runtime application identifier.
+        id: ConditionApplicationId,
     },
 }

@@ -294,7 +294,7 @@ application-level operations.
 - [ ] Model the common runtime state proven necessary by earlier UI work:
   - [x] Hit points and temporary hit points
   - [x] Generic resource pools
-  - [ ] Active conditions
+  - [x] Active conditions
   - [ ] Active effects and durations
   - [ ] Concentration state
   - [ ] Spell-slot state, only if it is genuinely common at this boundary
@@ -303,7 +303,7 @@ application-level operations.
   - [x] Heal
   - [x] Grant or replace temporary hit points
   - [x] Spend and restore a resource
-  - [ ] Apply and remove a condition
+  - [x] Apply and remove a condition
   - [ ] Apply and remove an effect
   - [ ] Start, replace, and end concentration
 - [ ] Define and enforce model invariants.

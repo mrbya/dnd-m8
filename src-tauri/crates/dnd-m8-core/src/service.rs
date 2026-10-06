@@ -3,7 +3,8 @@ use std::collections::{hash_map::Entry, HashMap};
 use dnd_m8_ruleset::RulesetRegistry;
 
 use crate::{
-    Character, CharacterId, CharacterSummary, CoreError, CoreResult, DamageOutcome, HealingOutcome,
+    Character, CharacterId, CharacterSummary, ConditionApplicationId, ConditionApplyOutcome,
+    ConditionId, ConditionRemoveOutcome, CoreError, CoreResult, DamageOutcome, HealingOutcome,
     ResourceId, ResourceRestoreOutcome, ResourceSpendOutcome,
 };
 
@@ -168,6 +169,36 @@ impl CharacterService {
         self.character_mut(character_id)?
             .restore_resource(resource_id, amount)
     }
+
+    /// Applies a condition to a managed character.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the character is unavailable or the condition
+    /// application cannot be stored.
+    pub fn apply_condition(
+        &mut self,
+        character_id: CharacterId,
+        condition_id: ConditionId,
+    ) -> CoreResult<ConditionApplyOutcome> {
+        self.character_mut(character_id)?
+            .apply_condition(condition_id)
+    }
+
+    /// Removes one condition application from a managed character.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the character or condition application is
+    /// unavailable.
+    pub fn remove_condition(
+        &mut self,
+        character_id: CharacterId,
+        application_id: ConditionApplicationId,
+    ) -> CoreResult<ConditionRemoveOutcome> {
+        self.character_mut(character_id)?
+            .remove_condition(application_id)
+    }
 }
 
 #[cfg(test)]
@@ -179,9 +210,9 @@ mod tests {
     use crate::{
         test::{
             expected_summary, test_character, test_character_id, test_character_with_resources,
-            test_resource_id, TestRuleset, INVALID_SCHEMA_MESSAGE, TEST_SCHEMA,
+            test_hit_points, test_resource_id, TestRuleset, INVALID_SCHEMA_MESSAGE, TEST_SCHEMA,
         },
-        CharacterId, CharacterService, CoreError, ResourceId,
+        CharacterId, CharacterService, ConditionApplicationId, ConditionId, CoreError, ResourceId,
     };
 
     type TestResult<T = ()> = Result<T, Box<dyn Error>>;
@@ -548,6 +579,64 @@ mod tests {
         service
             .restore_resource(character_id, &resource_id, 9)
             .expect_err("resource operation should reject unknown resource");
+
+        Ok(())
+    }
+
+    #[test]
+    fn condition_operations_mutate_character() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character(character_id, ruleset_id, TEST_SCHEMA)?)?;
+
+        let result = service.apply_condition(character_id, ConditionId::new("condition.1")?)?;
+        assert_eq!(result.condition_id, ConditionId::new("condition.1")?);
+
+        assert_eq!(
+            service.character(character_id)?.state().conditions().len(),
+            1
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn condition_operations_reject_unknown_characters() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character(character_id, ruleset_id, TEST_SCHEMA)?)?;
+        let unknown_id = CharacterId::new();
+
+        service
+            .apply_condition(unknown_id, ConditionId::new("condition.1")?)
+            .expect_err("operation should reject unknown character");
+
+        Ok(())
+    }
+
+    #[test]
+    fn removing_unknown_condition_instance_preserves_state() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_resources(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+
+        service.apply_condition(character_id, ConditionId::new("condition.1")?)?;
+        service
+            .remove_condition(character_id, ConditionApplicationId::new())
+            .expect_err("should fail on unknown condition instance");
+
+        assert_eq!(
+            service
+                .character(character_id)?
+                .state()
+                .hit_points()
+                .current(),
+            test_hit_points()?.current()
+        );
 
         Ok(())
     }

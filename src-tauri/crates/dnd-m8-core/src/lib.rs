@@ -75,9 +75,10 @@ pub(crate) mod state;
 
 // Re-exports.
 pub use character::{
-    Character, CharacterId, CharacterState, CharacterSummary, DamageOutcome, HealingOutcome,
-    HitPointState, ResourceId, ResourcePool, ResourcePools, ResourceRestoreOutcome,
-    ResourceSpendOutcome,
+    ActiveCondition, ActiveConditions, Character, CharacterId, CharacterState, CharacterSummary,
+    ConditionApplicationId, ConditionApplyOutcome, ConditionId, ConditionRemoveOutcome,
+    DamageOutcome, HealingOutcome, HitPointState, ResourceId, ResourcePool, ResourcePools,
+    ResourceRestoreOutcome, ResourceSpendOutcome,
 };
 pub use error::{CoreError, CoreResult};
 pub use service::CharacterService;

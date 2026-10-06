@@ -1,4 +1,4 @@
-use crate::ResourcePools;
+use crate::{ActiveConditions, ResourcePools};
 
 use super::hitpoints::HitPointState;
 
@@ -9,6 +9,8 @@ pub struct CharacterState {
     hit_points: HitPointState,
     /// Current generic resource pools.
     resources: ResourcePools,
+    /// Currently active condition applications.
+    conditions: ActiveConditions,
 }
 
 impl CharacterState {
@@ -18,15 +20,17 @@ impl CharacterState {
         Self {
             hit_points,
             resources: ResourcePools::new(),
+            conditions: ActiveConditions::new(),
         }
     }
 
     /// Constructs character runtime state with preconfigured resource pools.
     #[must_use]
-    pub const fn with_resources(hit_points: HitPointState, resources: ResourcePools) -> Self {
+    pub fn with_resources(hit_points: HitPointState, resources: ResourcePools) -> Self {
         Self {
             hit_points,
             resources,
+            conditions: ActiveConditions::new(),
         }
     }
 
@@ -50,5 +54,16 @@ impl CharacterState {
     /// Returns mutable resources for aggregate operations.
     pub(crate) const fn resources_mut(&mut self) -> &mut ResourcePools {
         &mut self.resources
+    }
+
+    /// Returns active condition applications.
+    #[must_use]
+    pub const fn conditions(&self) -> &ActiveConditions {
+        &self.conditions
+    }
+
+    /// Returns mutable conditions for aggregate operations.
+    pub(crate) const fn conditions_mut(&mut self) -> &mut ActiveConditions {
+        &mut self.conditions
     }
 }

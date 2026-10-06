@@ -3,6 +3,8 @@ use std::fmt;
 use dnd_m8_ruleset::{RulesetCharacterData, RulesetId};
 use uuid::Uuid;
 
+/// Active condition runtime state.
+mod conditions;
 /// Hit-point runtime state and transitions.
 mod hitpoints;
 /// Generic limited-resource runtime state.
@@ -13,6 +15,10 @@ mod state;
 mod summary;
 
 // Re-exports.
+pub use conditions::{
+    ActiveCondition, ActiveConditions, ConditionApplicationId, ConditionApplyOutcome, ConditionId,
+    ConditionRemoveOutcome,
+};
 pub use hitpoints::{DamageOutcome, HealingOutcome, HitPointState};
 pub use resources::{
     ResourceId, ResourcePool, ResourcePools, ResourceRestoreOutcome, ResourceSpendOutcome,
@@ -154,6 +160,33 @@ impl Character {
         amount: u32,
     ) -> CoreResult<ResourceRestoreOutcome> {
         self.state.resources_mut().restore(id, amount)
+    }
+
+    /// Applies a condition to this character.
+    ///
+    /// Repeated applications of the same condition are tracked independently.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the generated runtime application identifier collides
+    /// with an existing application.
+    pub fn apply_condition(
+        &mut self,
+        condition_id: ConditionId,
+    ) -> CoreResult<ConditionApplyOutcome> {
+        self.state.conditions_mut().apply(condition_id)
+    }
+
+    /// Removes one active condition application.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the application does not exist.
+    pub fn remove_condition(
+        &mut self,
+        application_id: ConditionApplicationId,
+    ) -> CoreResult<ConditionRemoveOutcome> {
+        self.state.conditions_mut().remove(application_id)
     }
 }
 

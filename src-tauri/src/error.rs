@@ -1,6 +1,6 @@
 use dnd_m8_core::CoreError::{
-    self, DuplicateResource, EmptyResourceId, InsufficientResource, InvalidResourcePool,
-    ResourceNotFound,
+    self, ConditionApplicationNotFound, DuplicateConditionApplication, DuplicateResource,
+    EmptyConditionId, EmptyResourceId, InsufficientResource, InvalidResourcePool, ResourceNotFound,
 };
 use serde::Serialize;
 use thiserror::Error;
@@ -49,7 +49,10 @@ impl From<Box<CoreError>> for CommandError {
             | InvalidResourcePool { .. }
             | DuplicateResource { .. }
             | ResourceNotFound { .. }
-            | InsufficientResource { .. } => CommandErrorCode::RulesetError,
+            | InsufficientResource { .. }
+            | EmptyConditionId
+            | DuplicateConditionApplication { .. }
+            | ConditionApplicationNotFound { .. } => CommandErrorCode::RulesetError,
         };
 
         Self {
