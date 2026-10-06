@@ -293,7 +293,7 @@ application-level operations.
   schema-identified `RulesetCharacterData`.
 - [ ] Model the common runtime state proven necessary by earlier UI work:
   - [x] Hit points and temporary hit points
-  - [ ] Generic resource pools
+  - [x] Generic resource pools
   - [ ] Active conditions
   - [ ] Active effects and durations
   - [ ] Concentration state
@@ -302,7 +302,7 @@ application-level operations.
   - [x] Take damage
   - [x] Heal
   - [x] Grant or replace temporary hit points
-  - [ ] Spend and restore a resource
+  - [x] Spend and restore a resource
   - [ ] Apply and remove a condition
   - [ ] Apply and remove an effect
   - [ ] Start, replace, and end concentration

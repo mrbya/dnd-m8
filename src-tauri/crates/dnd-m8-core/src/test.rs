@@ -5,7 +5,10 @@ use dnd_m8_ruleset::{
 use serde_json::{json, Value};
 use uuid::Uuid;
 
-use crate::{Character, CharacterId, CharacterState, CharacterSummary, CoreResult, HitPointState};
+use crate::{
+    Character, CharacterId, CharacterState, CharacterSummary, CoreResult, HitPointState,
+    ResourceId, ResourcePool,
+};
 
 /// Schema understood by [`TestRuleset`].
 pub const TEST_SCHEMA: &str = "org.dnd-m8.test.character@1";
@@ -91,6 +94,27 @@ pub fn test_character(
     ))
 }
 
+pub fn test_character_with_resources(
+    id: CharacterId,
+    ruleset_id: RulesetId,
+    schema: &str,
+) -> CoreResult<Character> {
+    let mut state = CharacterState::new(test_hit_points()?);
+    state.resources_mut().insert(test_resource()?)?;
+
+    Ok(Character::new(
+        id,
+        ruleset_id,
+        RulesetCharacterData::new(
+            schema,
+            json!({
+                "name": TEST_CHARACTER_NAME,
+            }),
+        ),
+        state,
+    ))
+}
+
 /// Returns the deterministic character identifier used by tests.
 #[must_use]
 pub fn test_character_id() -> CharacterId {
@@ -113,6 +137,16 @@ pub fn expected_ruleset_summary() -> RulesetCharacterSummary {
 /// Returns the validated runtime hit points used by test characters.
 pub fn test_hit_points() -> CoreResult<HitPointState> {
     HitPointState::new(1, 99, 7)
+}
+
+/// Returns validated test resource id used by the test character.
+pub fn test_resource_id() -> CoreResult<ResourceId> {
+    ResourceId::new("ki points")
+}
+
+/// Returns validated `ki points` resource used by test character.
+pub fn test_resource() -> CoreResult<ResourcePool> {
+    ResourcePool::new(test_resource_id()?, 6, 6)
 }
 
 /// Returns the combined summary expected from a valid test character.

@@ -178,10 +178,10 @@ mod tests {
 
     use crate::{
         test::{
-            expected_summary, test_character, test_character_id, TestRuleset,
-            INVALID_SCHEMA_MESSAGE, TEST_SCHEMA,
+            expected_summary, test_character, test_character_id, test_character_with_resources,
+            test_resource_id, TestRuleset, INVALID_SCHEMA_MESSAGE, TEST_SCHEMA,
         },
-        CharacterService, CoreError,
+        CharacterId, CharacterService, CoreError, ResourceId,
     };
 
     type TestResult<T = ()> = Result<T, Box<dyn Error>>;
@@ -433,5 +433,122 @@ mod tests {
                     )
             ));
         }
+    }
+
+    #[test]
+    fn spending_restoring_resource_mutates_character() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_resources(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+        let resource_id = test_resource_id()?;
+
+        let spend_result = service.spend_resource(character_id, &resource_id, 4)?;
+
+        assert_eq!(spend_result.spent, 4);
+        assert_eq!(spend_result.previous, 6);
+        assert_eq!(spend_result.current, 2);
+
+        let restore_result = service.restore_resource(character_id, &resource_id, 3)?;
+
+        assert_eq!(restore_result.restored, 3);
+        assert_eq!(restore_result.previous, 2);
+        assert_eq!(restore_result.current, 5);
+
+        let character = service.character(character_id)?;
+        let resource = character
+            .state()
+            .resources()
+            .resource(&resource_id)
+            .ok_or("fixture resource disappeared")?;
+
+        assert_eq!(resource.current(), 5);
+
+        Ok(())
+    }
+
+    #[test]
+    fn overspending_resources() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_resources(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+        let resource_id = test_resource_id()?;
+
+        let result = service.spend_resource(character_id, &resource_id, 8);
+
+        assert!(matches!(
+            result,
+            Err(error)
+                if matches!(
+                    error.as_ref(),
+                    CoreError::InsufficientResource {
+                        requested: 8,
+                        available: 6,
+                        ..
+                    }
+                )
+        ));
+
+        let character = service.character(character_id)?;
+        let resource = character
+            .state()
+            .resources()
+            .resource(&resource_id)
+            .ok_or("fixture resource disappeared")?;
+
+        assert_eq!(resource.current(), 6);
+
+        Ok(())
+    }
+
+    #[test]
+    fn resource_operations_reject_unknown_character() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_resources(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+        let resource_id = test_resource_id()?;
+
+        service
+            .spend_resource(CharacterId::new(), &resource_id, 9)
+            .expect_err("resource operation should reject unknown character");
+
+        service
+            .restore_resource(CharacterId::new(), &resource_id, 9)
+            .expect_err("resource operation should reject unknown character");
+
+        Ok(())
+    }
+
+    #[test]
+    fn resource_operations_reject_unknown_resource() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_resources(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+        let resource_id = ResourceId::new("unknown")?;
+
+        service
+            .spend_resource(character_id, &resource_id, 9)
+            .expect_err("resource operation should reject unknown resource");
+
+        service
+            .restore_resource(character_id, &resource_id, 9)
+            .expect_err("resource operation should reject unknown resource");
+
+        Ok(())
     }
 }

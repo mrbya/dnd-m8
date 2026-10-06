@@ -363,6 +363,14 @@ mod tests {
         pool.insert(ResourcePool::new(ResourceId::new("1")?, 0, 0)?)?;
         pool.insert(ResourcePool::new(ResourceId::new("2")?, 0, 0)?)?;
 
+        for (idx, resource) in pool.iter().enumerate() {
+            assert_eq!(resource.id(), &ResourceId::new(idx.to_string())?);
+        }
+
+        for (idx, resource) in pool.iter().enumerate() {
+            assert_eq!(resource.id(), &ResourceId::new(idx.to_string())?);
+        }
+
         Ok(())
     }
 }
