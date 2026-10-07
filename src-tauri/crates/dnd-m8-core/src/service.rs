@@ -3,9 +3,9 @@ use std::collections::{hash_map::Entry, HashMap};
 use dnd_m8_ruleset::RulesetRegistry;
 
 use crate::{
-    Character, CharacterId, CharacterSummary, ConditionApplicationId, ConditionApplyOutcome,
-    ConditionId, ConditionRemoveOutcome, CoreError, CoreResult, DamageOutcome, HealingOutcome,
-    ResourceId, ResourceRestoreOutcome, ResourceSpendOutcome,
+    Character, CharacterId, CharacterSummary, ConditionApplyOutcome, ConditionId,
+    ConditionInstanceId, ConditionRemoveOutcome, CoreError, CoreResult, DamageOutcome,
+    HealingOutcome, ResourceId, ResourceRestoreOutcome, ResourceSpendOutcome,
 };
 
 /// Provides application operations to manage characters.
@@ -194,10 +194,10 @@ impl CharacterService {
     pub fn remove_condition(
         &mut self,
         character_id: CharacterId,
-        application_id: ConditionApplicationId,
+        instance_id: ConditionInstanceId,
     ) -> CoreResult<ConditionRemoveOutcome> {
         self.character_mut(character_id)?
-            .remove_condition(application_id)
+            .remove_condition(instance_id)
     }
 }
 
@@ -212,7 +212,7 @@ mod tests {
             expected_summary, test_character, test_character_id, test_character_with_resources,
             test_hit_points, test_resource_id, TestRuleset, INVALID_SCHEMA_MESSAGE, TEST_SCHEMA,
         },
-        CharacterId, CharacterService, ConditionApplicationId, ConditionId, CoreError, ResourceId,
+        CharacterId, CharacterService, ConditionId, ConditionInstanceId, CoreError, ResourceId,
     };
 
     type TestResult<T = ()> = Result<T, Box<dyn Error>>;
@@ -626,7 +626,7 @@ mod tests {
 
         service.apply_condition(character_id, ConditionId::new("condition.1")?)?;
         service
-            .remove_condition(character_id, ConditionApplicationId::new())
+            .remove_condition(character_id, ConditionInstanceId::new())
             .expect_err("should fail on unknown condition instance");
 
         assert_eq!(

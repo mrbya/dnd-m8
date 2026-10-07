@@ -1,129 +1,75 @@
-use core::fmt;
-use std::collections::{btree_map::Entry, BTreeMap};
+use super::{Instance, Instances};
+use crate::{CoreError, CoreResult, DefinitionId, InstanceId};
 
-use uuid::Uuid;
-
-use crate::{CoreError, CoreResult};
+/// Compile-time domain marker for condition identifiers.
+///
+/// This type has no runtime values.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum ConditionKind {}
 
 /// Stable identifier of one ruleset-defined condition.
 ///
-/// The owning ruleset interprets identifiers such as `condition.poisoned`.
-/// Core only stores and compares them.
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct ConditionId(String);
+/// Core only stores and compares this identity, the owning ruleset
+/// interprets it.
+pub type ConditionId = DefinitionId<ConditionKind>;
 
-impl ConditionId {
-    /// Constructs a normalized condition identifier.
+/// Unique identifier of one runtime condition instance.
+///
+/// Multiple instances may reference the same [`ConditionId`].
+pub type ConditionInstanceId = InstanceId<ConditionKind>;
+
+impl DefinitionId<ConditionKind> {
+    /// Constructs a new `ConditionId` from a text identifier.
     ///
     /// # Errors
     ///
-    /// Returns [`CoreError::EmptyConditionId`] when the normalized identifier
-    /// is empty.
+    /// Returns [`CoreError::EmptyConditionId`] on empty string value.
     pub fn new(value: impl Into<String>) -> CoreResult<Self> {
-        let value = value.into();
-        let value = value.trim();
-
-        if value.is_empty() {
-            return Err(Box::new(CoreError::EmptyConditionId));
-        }
-
-        Ok(Self(value.to_owned()))
-    }
-
-    /// Returns the textual identifier.
-    #[must_use]
-    pub fn as_str(&self) -> &str {
-        &self.0
+        Self::from_text(value, CoreError::EmptyConditionId)
     }
 }
 
-impl fmt::Display for ConditionId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
-/// Unique identifier of one runtime condition application.
-///
-/// Multiple applications may reference the same [`ConditionId`].
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct ConditionApplicationId(Uuid);
-
-impl ConditionApplicationId {
-    /// Generates a new runtime application identifier.
-    #[must_use]
-    pub fn new() -> Self {
-        Self(Uuid::new_v4())
-    }
-
-    /// Constructs an application identifier from an existing UUID.
-    #[must_use]
-    pub const fn from_uuid(value: Uuid) -> Self {
-        Self(value)
-    }
-
-    /// Returns the underlying UUID.
-    #[must_use]
-    pub const fn as_uuid(&self) -> &Uuid {
-        &self.0
-    }
-}
-
-impl Default for ConditionApplicationId {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl fmt::Display for ConditionApplicationId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
-/// One active application of a ruleset-defined condition.
+/// One active instance of a ruleset-defined condition.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ActiveCondition {
-    /// Unique runtime application identifier.
-    application_id: ConditionApplicationId,
+    /// Unique runtime instance identifier.
+    instance_id: ConditionInstanceId,
     /// Ruleset-defined condition identifier.
     condition_id: ConditionId,
 }
 
 impl ActiveCondition {
-    /// Creates a new active condition application.
+    /// Creates a new active condition instance.
     #[must_use]
     pub fn new(condition_id: ConditionId) -> Self {
         Self {
-            application_id: ConditionApplicationId::new(),
+            instance_id: ConditionInstanceId::new(),
             condition_id,
         }
     }
 
-    /// Reconstructs an existing condition application.
+    /// Reconstructs an existing condition instance.
     ///
     /// This is primarily intended for deterministic tests and future
     /// persistence loading.
     #[must_use]
-    pub const fn from_parts(
-        application_id: ConditionApplicationId,
-        condition_id: ConditionId,
-    ) -> Self {
+    pub const fn from_parts(instance_id: ConditionInstanceId, condition_id: ConditionId) -> Self {
         Self {
-            application_id,
+            instance_id,
             condition_id,
         }
     }
+}
 
-    /// Returns the unique runtime application identifier.
-    #[must_use]
-    pub const fn application_id(&self) -> ConditionApplicationId {
-        self.application_id
+impl Instance for ActiveCondition {
+    type InstanceId = ConditionInstanceId;
+    type DefinitionId = ConditionId;
+
+    fn instance_id(&self) -> Self::InstanceId {
+        self.instance_id
     }
 
-    /// Returns the ruleset-defined condition identifier.
-    #[must_use]
-    pub const fn condition_id(&self) -> &ConditionId {
+    fn definition_id(&self) -> &Self::DefinitionId {
         &self.condition_id
     }
 }
@@ -131,34 +77,34 @@ impl ActiveCondition {
 /// Result of applying a condition.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConditionApplyOutcome {
-    /// Identifier of the newly stored application.
-    pub application_id: ConditionApplicationId,
+    /// Identifier of the newly stored instance.
+    pub instance_id: ConditionInstanceId,
     /// Ruleset-defined condition identifier.
     pub condition_id: ConditionId,
-    /// Whether this was the first active application of the condition.
+    /// Whether this was the first active instance of the condition.
     pub became_active: bool,
-    /// Number of active applications after the operation.
-    pub active_applications: usize,
+    /// Number of active instances after the operation.
+    pub active_instances: usize,
 }
 
-/// Result of removing a condition application.
+/// Result of removing a condition instance.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConditionRemoveOutcome {
-    /// Identifier of the removed application.
-    pub application_id: ConditionApplicationId,
+    /// Identifier of the removed instance.
+    pub instance_id: ConditionInstanceId,
     /// Ruleset-defined condition identifier.
     pub condition_id: ConditionId,
-    /// Whether another application keeps the condition active.
+    /// Whether another instance keeps the condition active.
     pub remains_active: bool,
-    /// Number of remaining applications of the same condition.
-    pub remaining_applications: usize,
+    /// Number of remaining instances of the same condition.
+    pub remaining_instances: usize,
 }
 
-/// Collection of active condition applications.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+/// Collection of active condition instances.
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct ActiveConditions {
-    /// Applications indexed by their unique runtime identifiers.
-    applications: BTreeMap<ConditionApplicationId, ActiveCondition>,
+    /// Instances indexed by their unique runtime identifiers.
+    instances: Instances<ActiveCondition>,
 }
 
 impl ActiveConditions {
@@ -173,111 +119,104 @@ impl ActiveConditions {
     /// # Errors
     ///
     /// Returns an error in the extremely unlikely event that the generated
-    /// application identifier is already present.
+    /// instance identifier is already present.
     pub fn apply(&mut self, condition_id: ConditionId) -> CoreResult<ConditionApplyOutcome> {
         self.insert(ActiveCondition::new(condition_id))
     }
 
-    /// Inserts an existing condition application.
+    /// Inserts an existing condition instance.
     ///
     /// # Errors
     ///
-    /// Returns [`CoreError::DuplicateConditionApplication`] when the exact
-    /// runtime application identifier is already present.
+    /// Returns [`CoreError::DuplicateConditionInstance`] when the exact
+    /// runtime instance identifier is already present.
     pub fn insert(&mut self, condition: ActiveCondition) -> CoreResult<ConditionApplyOutcome> {
-        let application_id = condition.application_id();
-        let condition_id = condition.condition_id().clone();
-        let became_active = !self.is_active(&condition_id);
+        let instance_id = condition.instance_id();
+        let condition_id = condition.condition_id.clone();
 
-        match self.applications.entry(application_id) {
-            Entry::Occupied(_) => {
-                return Err(Box::new(CoreError::DuplicateConditionApplication {
-                    id: application_id,
-                }));
-            }
-            Entry::Vacant(entry) => {
-                entry.insert(condition);
-            }
-        }
-
-        Ok(ConditionApplyOutcome {
-            application_id,
-            active_applications: self.application_count(&condition_id),
-            condition_id,
-            became_active,
-        })
-    }
-
-    /// Removes one condition application.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`CoreError::ConditionApplicationNotFound`] when the requested
-    /// application is unavailable.
-    pub fn remove(
-        &mut self,
-        application_id: ConditionApplicationId,
-    ) -> CoreResult<ConditionRemoveOutcome> {
-        let removed = self.applications.remove(&application_id).ok_or_else(|| {
-            Box::new(CoreError::ConditionApplicationNotFound { id: application_id })
+        self.instances.insert(condition).map_err(|duplicate| {
+            Box::new(CoreError::DuplicateConditionInstance { id: duplicate.id })
         })?;
 
-        let condition_id = removed.condition_id;
-        let remaining_applications = self.application_count(&condition_id);
+        let active_instances = self.instances.instance_count(&condition_id);
 
-        Ok(ConditionRemoveOutcome {
-            application_id,
+        Ok(ConditionApplyOutcome {
+            instance_id,
+            active_instances: self.instance_count(&condition_id),
             condition_id,
-            remains_active: remaining_applications > 0,
-            remaining_applications,
+            became_active: active_instances == 1,
         })
     }
 
-    /// Returns an application by its runtime identifier.
-    #[must_use]
-    pub fn condition(&self, application_id: ConditionApplicationId) -> Option<&ActiveCondition> {
-        self.applications.get(&application_id)
+    /// Removes one condition instance.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CoreError::ConditionInstanceNotFound`] when the requested
+    /// instance is unavailable.
+    pub fn remove(
+        &mut self,
+        instance_id: ConditionInstanceId,
+    ) -> CoreResult<ConditionRemoveOutcome> {
+        let removed = self
+            .instances
+            .remove(instance_id)
+            .ok_or_else(|| Box::new(CoreError::ConditionInstanceNotFound { id: instance_id }))?;
+
+        let condition_id = removed.condition_id;
+        let remaining_instances = self.instance_count(&condition_id);
+
+        Ok(ConditionRemoveOutcome {
+            instance_id,
+            condition_id,
+            remains_active: remaining_instances > 0,
+            remaining_instances,
+        })
     }
 
-    /// Returns whether at least one application of a condition is active.
+    /// Returns an instance by its runtime identifier.
+    #[must_use]
+    pub fn condition(&self, instance_id: ConditionInstanceId) -> Option<&ActiveCondition> {
+        self.instances.get(instance_id)
+    }
+
+    /// Returns whether at least one instance of a condition is active.
     #[must_use]
     pub fn is_active(&self, condition_id: &ConditionId) -> bool {
-        self.applications
-            .values()
-            .any(|condition| condition.condition_id() == condition_id)
+        self.instances.is_active(condition_id)
     }
 
-    /// Returns the number of active applications of a condition.
+    /// Returns the number of active instances of a condition.
     #[must_use]
-    pub fn application_count(&self, condition_id: &ConditionId) -> usize {
-        self.applications
-            .values()
-            .filter(|condition| condition.condition_id() == condition_id)
-            .count()
+    pub fn instance_count(&self, condition_id: &ConditionId) -> usize {
+        self.instances.instance_count(condition_id)
     }
 
-    /// Iterates over active applications in stable identifier order.
+    /// Iterates over active instances in stable identifier order.
     #[must_use]
     pub fn iter(&self) -> impl ExactSizeIterator<Item = &ActiveCondition> {
-        self.applications.values()
+        self.instances.iter()
     }
 
-    /// Returns the total number of active applications.
+    /// Returns the total number of active instances.
     #[must_use]
     pub fn len(&self) -> usize {
-        self.applications.len()
+        self.instances.len()
     }
 
-    /// Returns whether no condition applications are active.
+    /// Returns whether no condition instances are active.
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.applications.is_empty()
+        self.instances.is_empty()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{ActiveCondition, ActiveConditions, ConditionId, CoreResult};
+    use crate::{
+        character::runtime_instance::Instance, ActiveCondition, ActiveConditions, ConditionId,
+        CoreResult,
+    };
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -302,7 +241,7 @@ mod tests {
         conditions.insert(condition.clone())?;
         conditions
             .insert(condition)
-            .expect_err("duplicate application id should be rejected");
+            .expect_err("duplicate instance id should be rejected");
 
         Ok(())
     }
@@ -311,23 +250,23 @@ mod tests {
     fn missing_condition_removal_fails() -> CoreResult<()> {
         let mut conditions = ActiveConditions::new();
         let condition = ActiveCondition::new(ConditionId::new("condition.1")?);
-        let application_id = condition.application_id();
+        let instance_id = condition.instance_id();
 
         conditions
-            .remove(application_id)
+            .remove(instance_id)
             .expect_err("removing missing applied condition should fail");
 
         conditions.insert(condition)?;
 
         conditions
-            .remove(application_id)
+            .remove(instance_id)
             .expect("removing a present applied condition should pass");
 
         Ok(())
     }
 
     #[test]
-    fn removing_one_application_keeps_condition_active() -> CoreResult<()> {
+    fn removing_one_instance_keeps_condition_active() -> CoreResult<()> {
         let condition_id = ConditionId::new("condition.poisoned")?;
         let mut conditions = ActiveConditions::new();
 
@@ -336,12 +275,12 @@ mod tests {
 
         assert!(first.became_active);
         assert!(!second.became_active);
-        assert_eq!(conditions.application_count(&condition_id), 2);
+        assert_eq!(conditions.instance_count(&condition_id), 2);
 
-        let removed = conditions.remove(first.application_id)?;
+        let removed = conditions.remove(first.instance_id)?;
 
         assert!(removed.remains_active);
-        assert_eq!(removed.remaining_applications, 1);
+        assert_eq!(removed.remaining_instances, 1);
         assert!(conditions.is_active(&condition_id));
 
         Ok(())
@@ -355,47 +294,47 @@ mod tests {
 
         let mut result = conditions.apply(id1.clone())?;
         assert_eq!(result.condition_id, id1);
-        assert_eq!(conditions.application_count(&id1), 1);
-        assert_eq!(conditions.application_count(&id2), 0);
+        assert_eq!(conditions.instance_count(&id1), 1);
+        assert_eq!(conditions.instance_count(&id2), 0);
 
         result = conditions.apply(id2.clone())?;
         assert_eq!(result.condition_id, id2);
 
-        assert_eq!(conditions.application_count(&id1), 1);
-        assert_eq!(conditions.application_count(&id2), 1);
+        assert_eq!(conditions.instance_count(&id1), 1);
+        assert_eq!(conditions.instance_count(&id2), 1);
 
         let _ = conditions.apply(id1.clone())?;
         result = conditions.apply(id2.clone())?;
 
-        assert_eq!(conditions.application_count(&id1), 2);
-        assert_eq!(conditions.application_count(&id2), 2);
+        assert_eq!(conditions.instance_count(&id1), 2);
+        assert_eq!(conditions.instance_count(&id2), 2);
 
-        let remove_result = conditions.remove(result.application_id)?;
+        let remove_result = conditions.remove(result.instance_id)?;
 
         assert_eq!(remove_result.condition_id, id2);
 
-        assert_eq!(conditions.application_count(&id1), 2);
-        assert_eq!(conditions.application_count(&id2), 1);
+        assert_eq!(conditions.instance_count(&id1), 2);
+        assert_eq!(conditions.instance_count(&id2), 1);
 
         Ok(())
     }
 
     #[test]
-    fn iteration_includes_every_application() -> CoreResult<()> {
+    fn iteration_includes_every_instance() -> CoreResult<()> {
         let mut conditions = ActiveConditions::new();
         let id1 = ConditionId::new("condition.1")?;
         let id2 = ConditionId::new("condition.2")?;
         let ids = [
-            conditions.apply(id1)?.application_id,
-            conditions.apply(id2.clone())?.application_id,
-            conditions.apply(id2)?.application_id,
+            conditions.apply(id1)?.instance_id,
+            conditions.apply(id2.clone())?.instance_id,
+            conditions.apply(id2)?.instance_id,
         ];
         let mut iterated = Vec::new();
 
         assert_eq!(conditions.len(), 3);
 
         for condition in conditions.iter() {
-            let id = &condition.application_id;
+            let id = &condition.instance_id;
             assert!(ids.contains(id));
             assert!(!iterated.contains(id));
             iterated.push(*id);

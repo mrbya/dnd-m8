@@ -1,7 +1,7 @@
 use dnd_m8_ruleset::{RulesetError, RulesetId};
 use thiserror::Error;
 
-use crate::{CharacterId, ConditionApplicationId, ResourceId};
+use crate::{CharacterId, ConditionInstanceId, ResourceId};
 
 /// Result type alias used by core API.
 pub type CoreResult<T> = std::result::Result<T, Box<CoreError>>;
@@ -100,15 +100,15 @@ pub enum CoreError {
 
     /// A condition application with the same identifier already exists.
     #[error("condition application `{id}` is already active")]
-    DuplicateConditionApplication {
+    DuplicateConditionInstance {
         /// Duplicate runtime application identifier.
-        id: ConditionApplicationId,
+        id: ConditionInstanceId,
     },
 
     /// The requested condition application does not exist.
     #[error("condition application `{id}` was not found")]
-    ConditionApplicationNotFound {
+    ConditionInstanceNotFound {
         /// Missing runtime application identifier.
-        id: ConditionApplicationId,
+        id: ConditionInstanceId,
     },
 }
