@@ -1,7 +1,4 @@
-use dnd_m8_core::CoreError::{
-    self, ConditionInstanceNotFound, DuplicateConditionInstance, DuplicateResource,
-    EmptyConditionId, EmptyResourceId, InsufficientResource, InvalidResourcePool, ResourceNotFound,
-};
+use dnd_m8_core::CoreError;
 use serde::Serialize;
 use thiserror::Error;
 
@@ -45,14 +42,18 @@ impl From<Box<CoreError>> for CommandError {
             CoreError::RulesetNotFound { .. } => CommandErrorCode::RulesetNotFound,
             CoreError::Ruleset { .. }
             | CoreError::InvalidHitPointState { .. }
-            | EmptyResourceId
-            | InvalidResourcePool { .. }
-            | DuplicateResource { .. }
-            | ResourceNotFound { .. }
-            | InsufficientResource { .. }
-            | EmptyConditionId
-            | DuplicateConditionInstance { .. }
-            | ConditionInstanceNotFound { .. } => CommandErrorCode::RulesetError,
+            | CoreError::EmptyResourceId
+            | CoreError::InvalidResourcePool { .. }
+            | CoreError::DuplicateResource { .. }
+            | CoreError::ResourceNotFound { .. }
+            | CoreError::InsufficientResource { .. }
+            | CoreError::EmptyConditionId
+            | CoreError::DuplicateConditionInstance { .. }
+            | CoreError::ConditionInstanceNotFound { .. }
+            | CoreError::InvalidEffectDuration { .. }
+            | CoreError::EmptyEffectId
+            | CoreError::DuplicateEffectInstance { .. }
+            | CoreError::EffectInstanceNotFound { .. } => CommandErrorCode::RulesetError,
         };
 
         Self {

@@ -71,6 +71,11 @@ impl<I: Instance> Instances<I> {
         self.entries.get(&id)
     }
 
+    /// Returns a mutable reference to a stored instance.
+    pub fn get_mut(&mut self, id: I::InstanceId) -> Option<&mut I> {
+        self.entries.get_mut(&id)
+    }
+
     /// Returns whether any instances reference the definition.
     pub fn is_active(&self, definition_id: &I::DefinitionId) -> bool {
         self.entries

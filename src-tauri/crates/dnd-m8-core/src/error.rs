@@ -1,7 +1,7 @@
 use dnd_m8_ruleset::{RulesetError, RulesetId};
 use thiserror::Error;
 
-use crate::{CharacterId, ConditionInstanceId, ResourceId};
+use crate::{CharacterId, ConditionInstanceId, EffectInstanceId, ResourceId};
 
 /// Result type alias used by core API.
 pub type CoreResult<T> = std::result::Result<T, Box<CoreError>>;
@@ -98,17 +98,17 @@ pub enum CoreError {
     #[error("condition identifier cannot be empty")]
     EmptyConditionId,
 
-    /// A condition application with the same identifier already exists.
-    #[error("condition application `{id}` is already active")]
+    /// A condition instance was applied with an already existing instance id.
+    #[error("condition instance `{id}` is already active")]
     DuplicateConditionInstance {
         /// Duplicate runtime application identifier.
         id: ConditionInstanceId,
     },
 
-    /// The requested condition application does not exist.
-    #[error("condition application `{id}` was not found")]
+    /// The requested condition instance does not exist.
+    #[error("condition instance `{id}` was not found")]
     ConditionInstanceNotFound {
-        /// Missing runtime application identifier.
+        /// Missing runtime instance identifier.
         id: ConditionInstanceId,
     },
 
@@ -117,5 +117,23 @@ pub enum CoreError {
     InvalidEffectDuration {
         /// Invalid remaining round count.
         rounds: u32,
+    },
+
+    /// An effect identifier was empty.
+    #[error("effect identifier cannot be empty")]
+    EmptyEffectId,
+
+    /// An effect instance was applied with an already existing instance id.
+    #[error("effect instande `{id}` is already active")]
+    DuplicateEffectInstance {
+        /// Duplicate runtime isntance identifier.
+        id: EffectInstanceId,
+    },
+
+    /// The requested effect instance does not exist.
+    #[error("effect isntance `{id}` not found")]
+    EffectInstanceNotFound {
+        /// Missing effect instance identifier.
+        id: EffectInstanceId,
     },
 }
