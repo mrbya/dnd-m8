@@ -37,6 +37,7 @@ pub struct Instances<I: Instance> {
 
 impl<I: Instance> Instances<I> {
     /// Constructs a new storage pool of runtime instances.
+    #[must_use]
     pub const fn new() -> Self {
         Self {
             entries: BTreeMap::new(),
@@ -86,6 +87,7 @@ impl<I: Instance> Instances<I> {
     }
 
     /// Iterates over instances in runtime id order.
+    #[must_use]
     pub fn iter(&self) -> impl ExactSizeIterator<Item = &I> {
         self.entries.values()
     }
@@ -97,6 +99,7 @@ impl<I: Instance> Instances<I> {
     }
 
     /// Returns whether no instances are stored.
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }

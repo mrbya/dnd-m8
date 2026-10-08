@@ -25,10 +25,9 @@ pub use ids::{DefinitionId, InstanceId};
 pub use resources::{
     ResourceId, ResourcePool, ResourcePools, ResourceRestoreOutcome, ResourceSpendOutcome,
 };
+pub use runtime_instance::{Instance, Instances};
 pub use state::CharacterState;
 pub use summary::CharacterSummary;
-
-use runtime_instance::{Instance, Instances};
 
 use crate::CoreResult;
 
