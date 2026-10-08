@@ -41,42 +41,6 @@ pub enum CharacterKind {}
 /// Unique identifier for characters managed by the app.
 pub type CharacterId = InstanceId<CharacterKind>;
 
-///// Unique identifier for characters managed by the app.
-//#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-//pub struct CharacterId(Uuid);
-//
-//impl CharacterId {
-//    /// Creates a new random character identifier.
-//    #[must_use]
-//    pub fn new() -> Self {
-//        Self(Uuid::new_v4())
-//    }
-//
-//    /// Constructs a character identifier from an existing uuid.
-//    #[must_use]
-//    pub const fn from_uuid(value: Uuid) -> Self {
-//        Self(value)
-//    }
-//
-//    /// Returns the underlying uuid.
-//    #[must_use]
-//    pub const fn as_uuid(&self) -> &Uuid {
-//        &self.0
-//    }
-//}
-//
-//impl Default for CharacterId {
-//    fn default() -> Self {
-//        Self::new()
-//    }
-//}
-//
-//impl fmt::Display for CharacterId {
-//    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//        self.0.fmt(f)
-//    }
-//}
-
 /// A character stored and managed by D&D Mate.
 #[derive(Debug)]
 pub struct Character {
