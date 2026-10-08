@@ -77,7 +77,7 @@ impl<I: Instance> Instances<I> {
             .any(|instance| instance.definition_id() == definition_id)
     }
 
-    /// Returns the number of applications referencing the definition.
+    /// Returns the number of instances referencing the definition.
     pub fn instance_count(&self, definition_id: &I::DefinitionId) -> usize {
         self.entries
             .values()
@@ -85,7 +85,7 @@ impl<I: Instance> Instances<I> {
             .count()
     }
 
-    /// Iterates over applications in runtime id order.
+    /// Iterates over instances in runtime id order.
     pub fn iter(&self) -> impl ExactSizeIterator<Item = &I> {
         self.entries.values()
     }

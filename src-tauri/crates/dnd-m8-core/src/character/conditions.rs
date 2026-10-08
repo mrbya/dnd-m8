@@ -142,7 +142,7 @@ impl ActiveConditions {
 
         Ok(ConditionApplyOutcome {
             instance_id,
-            active_instances: self.instance_count(&condition_id),
+            active_instances,
             condition_id,
             became_active: active_instances == 1,
         })

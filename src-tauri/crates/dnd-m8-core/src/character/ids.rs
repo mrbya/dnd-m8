@@ -22,7 +22,7 @@ impl<Kind> DefinitionId<Kind> {
     /// # Errors
     ///
     /// Returns `empty_error` when the trimmed identifier is empty.
-    pub fn from_text(value: impl Into<String>, empty_error: CoreError) -> CoreResult<Self> {
+    pub(super) fn from_text(value: impl Into<String>, empty_error: CoreError) -> CoreResult<Self> {
         let value = value.into();
         let value = value.trim();
 

@@ -9,7 +9,7 @@ pub struct CharacterState {
     hit_points: HitPointState,
     /// Current generic resource pools.
     resources: ResourcePools,
-    /// Currently active condition applications.
+    /// Currently active condition instances.
     conditions: ActiveConditions,
 }
 
@@ -56,7 +56,7 @@ impl CharacterState {
         &mut self.resources
     }
 
-    /// Returns active condition applications.
+    /// Returns active condition instances.
     #[must_use]
     pub const fn conditions(&self) -> &ActiveConditions {
         &self.conditions

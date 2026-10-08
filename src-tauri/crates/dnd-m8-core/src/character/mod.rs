@@ -1,7 +1,4 @@
-use std::fmt;
-
 use dnd_m8_ruleset::{RulesetCharacterData, RulesetId};
-use uuid::Uuid;
 
 /// Active condition runtime state.
 mod conditions;
@@ -21,7 +18,7 @@ mod summary;
 // Re-exports.
 pub use conditions::{
     ActiveCondition, ActiveConditions, ConditionApplyOutcome, ConditionId, ConditionInstanceId,
-    ConditionRemoveOutcome,
+    ConditionKind, ConditionRemoveOutcome,
 };
 pub use hitpoints::{DamageOutcome, HealingOutcome, HitPointState};
 pub use ids::{DefinitionId, InstanceId};
@@ -35,41 +32,50 @@ use runtime_instance::{Instance, Instances};
 
 use crate::CoreResult;
 
+/// Compile-time domain marker for character identifiers.
+///
+/// This type has no runtime value.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum CharacterKind {}
+
 /// Unique identifier for characters managed by the app.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct CharacterId(Uuid);
+pub type CharacterId = InstanceId<CharacterKind>;
 
-impl CharacterId {
-    /// Creates a new random character identifier.
-    #[must_use]
-    pub fn new() -> Self {
-        Self(Uuid::new_v4())
-    }
-
-    /// Constructs a character identifier from an existing uuid.
-    #[must_use]
-    pub const fn from_uuid(value: Uuid) -> Self {
-        Self(value)
-    }
-
-    /// Returns the underlying uuid.
-    #[must_use]
-    pub const fn as_uuid(&self) -> &Uuid {
-        &self.0
-    }
-}
-
-impl Default for CharacterId {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl fmt::Display for CharacterId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
-    }
-}
+///// Unique identifier for characters managed by the app.
+//#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+//pub struct CharacterId(Uuid);
+//
+//impl CharacterId {
+//    /// Creates a new random character identifier.
+//    #[must_use]
+//    pub fn new() -> Self {
+//        Self(Uuid::new_v4())
+//    }
+//
+//    /// Constructs a character identifier from an existing uuid.
+//    #[must_use]
+//    pub const fn from_uuid(value: Uuid) -> Self {
+//        Self(value)
+//    }
+//
+//    /// Returns the underlying uuid.
+//    #[must_use]
+//    pub const fn as_uuid(&self) -> &Uuid {
+//        &self.0
+//    }
+//}
+//
+//impl Default for CharacterId {
+//    fn default() -> Self {
+//        Self::new()
+//    }
+//}
+//
+//impl fmt::Display for CharacterId {
+//    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//        self.0.fmt(f)
+//    }
+//}
 
 /// A character stored and managed by D&D Mate.
 #[derive(Debug)]
