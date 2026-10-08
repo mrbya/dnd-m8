@@ -111,4 +111,11 @@ pub enum CoreError {
         /// Missing runtime application identifier.
         id: ConditionInstanceId,
     },
+
+    /// An effect duration contained an invalid value.
+    #[error("effect duration must be at least 1 round, got: `{rounds}`")]
+    InvalidEffectDuration {
+        /// Invalid remaining round count.
+        rounds: u32,
+    },
 }

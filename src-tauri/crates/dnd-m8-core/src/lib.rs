@@ -77,8 +77,9 @@ pub(crate) mod state;
 pub use character::{
     ActiveCondition, ActiveConditions, Character, CharacterId, CharacterState, CharacterSummary,
     ConditionApplyOutcome, ConditionId, ConditionInstanceId, ConditionKind, ConditionRemoveOutcome,
-    DamageOutcome, DefinitionId, HealingOutcome, HitPointState, Instance, InstanceId, Instances,
-    ResourceId, ResourcePool, ResourcePools, ResourceRestoreOutcome, ResourceSpendOutcome,
+    DamageOutcome, DefinitionId, EffectDuration, HealingOutcome, HitPointState, Instance,
+    InstanceId, Instances, ResourceId, ResourcePool, ResourcePools, ResourceRestoreOutcome,
+    ResourceSpendOutcome,
 };
 pub use error::{CoreError, CoreResult};
 pub use service::CharacterService;

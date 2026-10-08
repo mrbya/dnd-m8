@@ -2,6 +2,8 @@ use dnd_m8_ruleset::{RulesetCharacterData, RulesetId};
 
 /// Active condition runtime state.
 mod conditions;
+/// Effect duration tracking.
+mod duration;
 /// Hit-point runtime state and transitions.
 mod hitpoints;
 /// Shared type identifiers for runtime state.
@@ -20,6 +22,7 @@ pub use conditions::{
     ActiveCondition, ActiveConditions, ConditionApplyOutcome, ConditionId, ConditionInstanceId,
     ConditionKind, ConditionRemoveOutcome,
 };
+pub use duration::EffectDuration;
 pub use hitpoints::{DamageOutcome, HealingOutcome, HitPointState};
 pub use ids::{DefinitionId, InstanceId};
 pub use resources::{
@@ -28,6 +31,8 @@ pub use resources::{
 pub use runtime_instance::{Instance, Instances};
 pub use state::CharacterState;
 pub use summary::CharacterSummary;
+
+use duration::DurationAdvance;
 
 use crate::CoreResult;
 
