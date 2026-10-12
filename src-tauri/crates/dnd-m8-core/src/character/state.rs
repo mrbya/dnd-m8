@@ -1,4 +1,4 @@
-use crate::{character::ActiveEffects, ActiveConditions, ResourcePools};
+use crate::{character::ActiveEffects, ActiveConditions, EffectInstanceId, ResourcePools};
 
 use super::hitpoints::HitPointState;
 
@@ -13,6 +13,8 @@ pub struct CharacterState {
     conditions: ActiveConditions,
     /// Currently active effects.
     effects: ActiveEffects,
+    /// Effect instance currently sustained through concentration.
+    concentration: Option<EffectInstanceId>,
 }
 
 impl CharacterState {
@@ -24,6 +26,7 @@ impl CharacterState {
             resources: ResourcePools::new(),
             conditions: ActiveConditions::new(),
             effects: ActiveEffects::new(),
+            concentration: None,
         }
     }
 
@@ -35,6 +38,7 @@ impl CharacterState {
             resources,
             conditions: ActiveConditions::new(),
             effects: ActiveEffects::new(),
+            concentration: None,
         }
     }
 
@@ -70,6 +74,17 @@ impl CharacterState {
     #[must_use]
     pub const fn effects(&self) -> &ActiveEffects {
         &self.effects
+    }
+
+    /// Returns the effect instance currently sustained through concentration.
+    #[must_use]
+    pub const fn concentration(&self) -> Option<EffectInstanceId> {
+        self.concentration
+    }
+
+    /// Updates concentration after an aggregate transition validates its target.
+    pub(super) const fn set_concentration(&mut self, concentration: Option<EffectInstanceId>) {
+        self.concentration = concentration;
     }
 
     /// Returns mutable conditions for aggregate operations.

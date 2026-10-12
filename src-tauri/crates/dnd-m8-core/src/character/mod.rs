@@ -1,5 +1,7 @@
 use dnd_m8_ruleset::{RulesetCharacterData, RulesetId};
 
+/// Concentration change.
+mod concentration;
 /// Active condition runtime state.
 mod conditions;
 /// Effect duration tracking.
@@ -20,6 +22,7 @@ mod state;
 mod summary;
 
 // Re-exports.
+pub use concentration::ConcentrationChangeOutcome;
 pub use conditions::{
     ActiveCondition, ActiveConditions, ConditionApplyOutcome, ConditionId, ConditionInstanceId,
     ConditionKind, ConditionRemoveOutcome,
@@ -38,7 +41,7 @@ pub use runtime_instance::{Instance, Instances};
 pub use state::CharacterState;
 pub use summary::CharacterSummary;
 
-use crate::CoreResult;
+use crate::{CoreError, CoreResult};
 
 /// Compile-time domain marker for character identifiers.
 ///
@@ -199,7 +202,13 @@ impl Character {
         &mut self,
         instance_id: EffectInstanceId,
     ) -> CoreResult<EffectRemoveOutcome> {
-        self.state.effects_mut().remove(instance_id)
+        let outcome = self.state.effects_mut().remove(instance_id)?;
+
+        if self.state.concentration() == Some(instance_id) {
+            self.state.set_concentration(None);
+        }
+
+        Ok(outcome)
     }
 
     /// Advances duration of one effect instance
@@ -212,7 +221,120 @@ impl Character {
         instance_id: EffectInstanceId,
         rounds: u32,
     ) -> CoreResult<EffectAdvanceOutcome> {
-        self.state.effects_mut().advance_rounds(instance_id, rounds)
+        let outcome = self
+            .state
+            .effects_mut()
+            .advance_rounds(instance_id, rounds)?;
+
+        if outcome.remaining_duration.is_none() && self.state.concentration() == Some(instance_id) {
+            self.state.set_concentration(None);
+        }
+
+        Ok(outcome)
+    }
+
+    /// Starts concentration on an effect already active on this character.
+    ///
+    /// Starting on the current concentrated instance is a successful no-op.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the target effect is absent or another effect
+    /// is already sustained through concentration.
+    pub fn start_concentration(
+        &mut self,
+        instance_id: EffectInstanceId,
+    ) -> CoreResult<ConcentrationChangeOutcome> {
+        self.validate_concentration_target(instance_id)?;
+
+        let previous = self.state.concentration();
+
+        if let Some(current) = previous {
+            if current != instance_id {
+                return Err(Box::new(CoreError::ConcentrationAlreadyActive { current }));
+            }
+        }
+
+        self.state.set_concentration(Some(instance_id));
+
+        Ok(ConcentrationChangeOutcome {
+            previous,
+            current: Some(instance_id),
+            removed_effect: None,
+        })
+    }
+
+    /// Replaces concentration with an effect already active on this character.
+    ///
+    /// The previous concentrated effect is removed. Selecting the current
+    /// instance is a successful no-op. When concentration is absent, this
+    /// operation starts it.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the target or previously concentrated effect
+    /// instance is absent.
+    pub fn replace_concentration(
+        &mut self,
+        instance_id: EffectInstanceId,
+    ) -> CoreResult<ConcentrationChangeOutcome> {
+        // Validate the replacement before removing the existing effect.
+        self.validate_concentration_target(instance_id)?;
+
+        let previous = self.state.concentration();
+
+        let removed_effect = match previous {
+            Some(current) if current != instance_id => {
+                Some(self.state.effects_mut().remove(current)?)
+            }
+            Some(_) | None => None,
+        };
+
+        self.state.set_concentration(Some(instance_id));
+
+        Ok(ConcentrationChangeOutcome {
+            previous,
+            current: Some(instance_id),
+            removed_effect,
+        })
+    }
+
+    /// Ends concentration and removes the effect it sustained.
+    ///
+    /// Ending absent concentration is a successful no-op.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the concentrated effect instance is absent.
+    pub fn end_concentration(&mut self) -> CoreResult<ConcentrationChangeOutcome> {
+        let previous = self.state.concentration();
+
+        let removed_effect = match previous {
+            Some(current) => Some(self.state.effects_mut().remove(current)?),
+            None => None,
+        };
+
+        self.state.set_concentration(None);
+
+        Ok(ConcentrationChangeOutcome {
+            previous,
+            current: None,
+            removed_effect,
+        })
+    }
+
+    /// Validates that a concentration target exists on this character.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CoreError::EffectInstanceNotFound`] when the target is absent.
+    fn validate_concentration_target(&self, instance_id: EffectInstanceId) -> CoreResult<()> {
+        self.state
+            .effects()
+            .effect(instance_id)
+            .ok_or_else(|| Box::new(CoreError::EffectInstanceNotFound { id: instance_id }))?;
+
+        Ok(())
     }
 }
 

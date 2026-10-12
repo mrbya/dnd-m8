@@ -53,7 +53,8 @@ impl From<Box<CoreError>> for CommandError {
             | CoreError::InvalidEffectDuration { .. }
             | CoreError::EmptyEffectId
             | CoreError::DuplicateEffectInstance { .. }
-            | CoreError::EffectInstanceNotFound { .. } => CommandErrorCode::RulesetError,
+            | CoreError::EffectInstanceNotFound { .. }
+            | CoreError::ConcentrationAlreadyActive { .. } => CommandErrorCode::RulesetError,
         };
 
         Self {

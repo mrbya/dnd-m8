@@ -136,4 +136,11 @@ pub enum CoreError {
         /// Missing effect instance identifier.
         id: EffectInstanceId,
     },
+
+    /// Starting concentration would replace an existing concentrated effect.
+    #[error("already concentrating on effect instance `{current}`")]
+    ConcentrationAlreadyActive {
+        /// Effect instance currently sustained through concentration.
+        current: EffectInstanceId,
+    },
 }

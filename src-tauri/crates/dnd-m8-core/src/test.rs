@@ -6,8 +6,8 @@ use serde_json::{json, Value};
 use uuid::Uuid;
 
 use crate::{
-    Character, CharacterId, CharacterState, CharacterSummary, CoreResult, HitPointState,
-    ResourceId, ResourcePool,
+    ActiveEffect, Character, CharacterId, CharacterState, CharacterSummary, CoreResult,
+    EffectDuration, EffectId, EffectInstanceId, HitPointState, ResourceId, ResourcePool,
 };
 
 /// Schema understood by [`TestRuleset`].
@@ -101,6 +101,47 @@ pub fn test_character_with_resources(
 ) -> CoreResult<Character> {
     let mut state = CharacterState::new(test_hit_points()?);
     state.resources_mut().insert(test_resource()?)?;
+
+    Ok(Character::new(
+        id,
+        ruleset_id,
+        RulesetCharacterData::new(
+            schema,
+            json!({
+                "name": TEST_CHARACTER_NAME,
+            }),
+        ),
+        state,
+    ))
+}
+
+pub fn test_effect_id() -> CoreResult<EffectId> {
+    EffectId::new("effect.spirit_guardians")
+}
+
+pub fn test_effect_duration() -> CoreResult<EffectDuration> {
+    EffectDuration::rounds(9)
+}
+
+pub fn test_effect_instance_id() -> EffectInstanceId {
+    EffectInstanceId::from_uuid(Uuid::from_u128(123_123_123_u128))
+}
+
+pub fn test_effect() -> CoreResult<ActiveEffect> {
+    Ok(ActiveEffect::from_parts(
+        test_effect_instance_id(),
+        test_effect_id()?,
+        test_effect_duration()?,
+    ))
+}
+
+pub fn test_character_with_effects(
+    id: CharacterId,
+    ruleset_id: RulesetId,
+    schema: &str,
+) -> CoreResult<Character> {
+    let mut state = CharacterState::new(test_hit_points()?);
+    state.effects_mut().insert(test_effect()?)?;
 
     Ok(Character::new(
         id,
