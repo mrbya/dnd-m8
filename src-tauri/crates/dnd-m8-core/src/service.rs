@@ -3,9 +3,12 @@ use std::collections::{hash_map::Entry, HashMap};
 use dnd_m8_ruleset::RulesetRegistry;
 
 use crate::{
+    character::{
+        EffectAdvanceOutcome, EffectApplyOutcome, EffectId, EffectInstanceId, EffectRemoveOutcome,
+    },
     Character, CharacterId, CharacterSummary, ConditionApplyOutcome, ConditionId,
     ConditionInstanceId, ConditionRemoveOutcome, CoreError, CoreResult, DamageOutcome,
-    HealingOutcome, ResourceId, ResourceRestoreOutcome, ResourceSpendOutcome,
+    EffectDuration, HealingOutcome, ResourceId, ResourceRestoreOutcome, ResourceSpendOutcome,
 };
 
 /// Provides application operations to manage characters.
@@ -175,7 +178,7 @@ impl CharacterService {
     /// # Errors
     ///
     /// Returns an error when the character is unavailable or the condition
-    /// application cannot be stored.
+    /// instance cannot be stored.
     pub fn apply_condition(
         &mut self,
         character_id: CharacterId,
@@ -185,11 +188,11 @@ impl CharacterService {
             .apply_condition(condition_id)
     }
 
-    /// Removes one condition application from a managed character.
+    /// Removes one condition instance from a managed character.
     ///
     /// # Errors
     ///
-    /// Returns an error when the character or condition application is
+    /// Returns an error when the character or condition instance is
     /// unavailable.
     pub fn remove_condition(
         &mut self,
@@ -198,6 +201,52 @@ impl CharacterService {
     ) -> CoreResult<ConditionRemoveOutcome> {
         self.character_mut(character_id)?
             .remove_condition(instance_id)
+    }
+
+    //// Applies an effect to a managed character.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the character is unavailable or the effect
+    /// instance cannot be stored.
+    pub fn apply_effect(
+        &mut self,
+        character_id: CharacterId,
+        effect_id: EffectId,
+        duration: EffectDuration,
+    ) -> CoreResult<EffectApplyOutcome> {
+        self.character_mut(character_id)?
+            .apply_effect(effect_id, duration)
+    }
+
+    /// Removes one effect instance frome a managed character.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the character or the effect instance is
+    /// unavailable.
+    pub fn remove_effect(
+        &mut self,
+        character_id: CharacterId,
+        instance_id: EffectInstanceId,
+    ) -> CoreResult<EffectRemoveOutcome> {
+        self.character_mut(character_id)?.remove_effect(instance_id)
+    }
+
+    /// Advances the duration of one effect applied to a managed character.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the character or the effect instance is
+    /// unavailable.
+    pub fn advance_effect_rounds(
+        &mut self,
+        character_id: CharacterId,
+        instance_id: EffectInstanceId,
+        rounds: u32,
+    ) -> CoreResult<EffectAdvanceOutcome> {
+        self.character_mut(character_id)?
+            .advance_effect_rounds(instance_id, rounds)
     }
 }
 
@@ -212,7 +261,8 @@ mod tests {
             expected_summary, test_character, test_character_id, test_character_with_resources,
             test_hit_points, test_resource_id, TestRuleset, INVALID_SCHEMA_MESSAGE, TEST_SCHEMA,
         },
-        CharacterId, CharacterService, ConditionId, ConditionInstanceId, CoreError, ResourceId,
+        CharacterId, CharacterService, ConditionId, ConditionInstanceId, CoreError, EffectDuration,
+        EffectId, EffectInstanceId, ResourceId,
     };
 
     type TestResult<T = ()> = Result<T, Box<dyn Error>>;
@@ -628,6 +678,85 @@ mod tests {
         service
             .remove_condition(character_id, ConditionInstanceId::new())
             .expect_err("should fail on unknown condition instance");
+
+        assert_eq!(
+            service
+                .character(character_id)?
+                .state()
+                .hit_points()
+                .current(),
+            test_hit_points()?.current()
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn effect_operations_mutate_character() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character(character_id, ruleset_id, TEST_SCHEMA)?)?;
+
+        let result = service.apply_effect(
+            character_id,
+            EffectId::new("effect.1")?,
+            EffectDuration::UntilRemoved,
+        )?;
+        assert_eq!(result.effect_id, EffectId::new("effect.1")?);
+
+        assert_eq!(service.character(character_id)?.state().effects().len(), 1);
+
+        Ok(())
+    }
+
+    #[test]
+    fn effect_operations_reject_unknown_characters() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character(character_id, ruleset_id, TEST_SCHEMA)?)?;
+        let unknown_id = CharacterId::new();
+
+        service
+            .apply_effect(
+                unknown_id,
+                EffectId::new("effect.1")?,
+                EffectDuration::UntilRemoved,
+            )
+            .expect_err("operation should reject unknown character");
+
+        let result = service.apply_effect(
+            character_id,
+            EffectId::new("effect.1")?,
+            EffectDuration::rounds(3)?,
+        )?;
+
+        let error = service
+            .advance_effect_rounds(unknown_id, result.instance_id, 3)
+            .expect_err("should reject unknown character");
+
+        assert!(matches!(*error, CoreError::CharacterNotFound { .. }));
+
+        Ok(())
+    }
+
+    #[test]
+    fn removing_unknown_effect_instance_preserves_state() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_resources(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+
+        service.apply_effect(
+            character_id,
+            EffectId::new("effect.1")?,
+            EffectDuration::UntilRemoved,
+        )?;
+        service
+            .remove_effect(character_id, EffectInstanceId::new())
+            .expect_err("should fail on unknown effect instance");
 
         assert_eq!(
             service

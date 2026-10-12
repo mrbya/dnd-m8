@@ -153,8 +153,8 @@ impl Character {
     ///
     /// # Errors
     ///
-    /// Returns an error if the generated runtime application identifier collides
-    /// with an existing application.
+    /// Returns an error if the generated runtime instance identifier collides
+    /// with an existing condition instance.
     pub fn apply_condition(
         &mut self,
         condition_id: ConditionId,
@@ -162,16 +162,57 @@ impl Character {
         self.state.conditions_mut().apply(condition_id)
     }
 
-    /// Removes one active condition application.
+    /// Removes one active condition instance.
     ///
     /// # Errors
     ///
-    /// Returns an error when the application does not exist.
+    /// Returns an error when the condition instance does not exist.
     pub fn remove_condition(
         &mut self,
         instance_id: ConditionInstanceId,
     ) -> CoreResult<ConditionRemoveOutcome> {
         self.state.conditions_mut().remove(instance_id)
+    }
+
+    /// Applies an effect to this character
+    ///
+    /// Repeatedinstances of the same effect are tracked independently.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the generated instance identifier collides
+    /// with an existing effect instance.
+    pub fn apply_effect(
+        &mut self,
+        effect_id: EffectId,
+        duration: EffectDuration,
+    ) -> CoreResult<EffectApplyOutcome> {
+        self.state.effects_mut().apply(effect_id, duration)
+    }
+
+    /// Removes one active effect instance.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the effect instance does not exist.
+    pub fn remove_effect(
+        &mut self,
+        instance_id: EffectInstanceId,
+    ) -> CoreResult<EffectRemoveOutcome> {
+        self.state.effects_mut().remove(instance_id)
+    }
+
+    /// Advances duration of one effect instance
+    ///
+    /// # Errors
+    ///
+    /// Returns an error when the effect instance does not exist.
+    pub fn advance_effect_rounds(
+        &mut self,
+        instance_id: EffectInstanceId,
+        rounds: u32,
+    ) -> CoreResult<EffectAdvanceOutcome> {
+        self.state.effects_mut().advance_rounds(instance_id, rounds)
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::{ActiveConditions, ResourcePools};
+use crate::{character::ActiveEffects, ActiveConditions, ResourcePools};
 
 use super::hitpoints::HitPointState;
 
@@ -11,6 +11,8 @@ pub struct CharacterState {
     resources: ResourcePools,
     /// Currently active condition instances.
     conditions: ActiveConditions,
+    /// Currently active effects.
+    effects: ActiveEffects,
 }
 
 impl CharacterState {
@@ -21,6 +23,7 @@ impl CharacterState {
             hit_points,
             resources: ResourcePools::new(),
             conditions: ActiveConditions::new(),
+            effects: ActiveEffects::new(),
         }
     }
 
@@ -31,6 +34,7 @@ impl CharacterState {
             hit_points,
             resources,
             conditions: ActiveConditions::new(),
+            effects: ActiveEffects::new(),
         }
     }
 
@@ -62,8 +66,19 @@ impl CharacterState {
         &self.conditions
     }
 
+    /// Returns active effect instances.
+    #[must_use]
+    pub const fn effects(&self) -> &ActiveEffects {
+        &self.effects
+    }
+
     /// Returns mutable conditions for aggregate operations.
     pub(crate) const fn conditions_mut(&mut self) -> &mut ActiveConditions {
         &mut self.conditions
+    }
+
+    /// Returns effects for aggregate transitions.
+    pub(crate) const fn effects_mut(&mut self) -> &mut ActiveEffects {
+        &mut self.effects
     }
 }

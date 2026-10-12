@@ -293,3 +293,152 @@ impl ActiveEffects {
         self.instances.is_empty()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        character::{ActiveEffect, ActiveEffects, EffectId, EffectInstanceId},
+        CoreResult, EffectDuration, Instance,
+    };
+    use pretty_assertions::assert_eq;
+    use uuid::Uuid;
+
+    #[test]
+    fn duplicate_rejection_perserves_original_duration() -> CoreResult<()> {
+        let mut effects = ActiveEffects::new();
+        let iid = EffectInstanceId::new();
+        let id = EffectId::new("effect.1")?;
+        let e1 = ActiveEffect::from_parts(iid, id.clone(), EffectDuration::rounds(3)?);
+        let e2 = ActiveEffect::from_parts(iid, id, EffectDuration::rounds(9)?);
+
+        effects.insert(e1)?;
+        effects
+            .insert(e2)
+            .expect_err("duplicate should be rejected");
+
+        assert_eq!(
+            effects.effect(iid).expect("should be present").duration(),
+            EffectDuration::rounds(3)?
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn two_instances_have_independent_effect_durations() -> CoreResult<()> {
+        let mut effects = ActiveEffects::new();
+        let id = EffectId::new("effect.1")?;
+        let e1 = ActiveEffect::new(id.clone(), EffectDuration::rounds(3)?);
+        let e2 = ActiveEffect::new(id, EffectDuration::rounds(9)?);
+
+        effects.insert(e1.clone())?;
+        effects.insert(e2.clone())?;
+        effects.advance_rounds(e1.instance_id, 2)?;
+
+        assert_eq!(
+            effects
+                .effect(e1.instance_id)
+                .expect("should be present")
+                .duration(),
+            EffectDuration::rounds(1)?
+        );
+
+        assert_eq!(
+            effects
+                .effect(e2.instance_id)
+                .expect("should be present")
+                .duration(),
+            EffectDuration::rounds(9)?
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn expiring_instance_leaves_other_active() -> CoreResult<()> {
+        let mut effects = ActiveEffects::new();
+        let id = EffectId::new("effect.1")?;
+        let e1 = ActiveEffect::new(id.clone(), EffectDuration::rounds(3)?);
+        let e2 = ActiveEffect::new(id, EffectDuration::rounds(9)?);
+
+        effects.insert(e1.clone()).expect("effect should be stored");
+
+        assert_eq!(
+            effects
+                .effect(e1.instance_id)
+                .expect("should be present")
+                .duration(),
+            EffectDuration::rounds(3)?
+        );
+
+        effects.insert(e2.clone()).expect("effect should be stored");
+        effects.advance_rounds(e1.instance_id, 3)?;
+
+        assert!(effects.effect(e1.instance_id).is_none());
+
+        assert_eq!(
+            effects
+                .effect(e2.instance_id)
+                .expect("should be present")
+                .duration(),
+            EffectDuration::rounds(9)?
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn failed_operation_perserves_collection() -> CoreResult<()> {
+        let mut effects = ActiveEffects::new();
+        let id = EffectId::new("effect.1")?;
+        let e1 = ActiveEffect::new(id.clone(), EffectDuration::rounds(3)?);
+        let e2 = ActiveEffect::new(id.clone(), EffectDuration::rounds(9)?);
+
+        effects.insert(e1).expect("effect should be stored");
+        effects.insert(e2).expect("effect should be stored");
+
+        effects
+            .remove(EffectInstanceId::new())
+            .expect_err("missing id should be rejected");
+
+        assert_eq!(effects.len(), 2);
+
+        effects
+            .advance_rounds(EffectInstanceId::new(), 3)
+            .expect_err("missing id should be rejected");
+
+        assert_eq!(effects.len(), 2);
+        assert!(effects.is_active(&id));
+
+        Ok(())
+    }
+
+    #[test]
+    fn iteraton_follows_instance_id_order() -> CoreResult<()> {
+        let mut effects = ActiveEffects::new();
+        let id1 = EffectId::new("effect.1")?;
+        let id2 = EffectId::new("effect.2")?;
+        let i_id1 = EffectInstanceId::from_uuid(Uuid::from_u128(0_u128));
+        let i_id2 = EffectInstanceId::from_uuid(Uuid::from_u128(1_u128));
+        let i_id3 = EffectInstanceId::from_uuid(Uuid::from_u128(2_u128));
+
+        let e1 = ActiveEffect::from_parts(i_id1, id1.clone(), EffectDuration::UntilRemoved);
+        let e2 = ActiveEffect::from_parts(i_id2, id2, EffectDuration::UntilRemoved);
+        let e3 = ActiveEffect::from_parts(i_id3, id1, EffectDuration::UntilRemoved);
+
+        let ids = [i_id1, i_id2, i_id3];
+
+        effects.insert(e1)?;
+        effects.insert(e2)?;
+        effects.insert(e3)?;
+
+        for (idx, effect) in effects.iter().enumerate() {
+            assert_eq!(
+                &effect.instance_id(),
+                ids.get(idx).expect("should be present")
+            );
+        }
+
+        Ok(())
+    }
+}
