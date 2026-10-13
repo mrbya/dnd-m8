@@ -850,9 +850,19 @@ mod tests {
         let result = service.start_concentration(character_id, test_effect_instance_id())?;
         assert_eq!(result.current, Some(test_effect_instance_id()));
 
+        let other = service.apply_effect(
+            character_id,
+            EffectId::new("effect.other")?,
+            EffectDuration::UntilRemoved,
+        )?;
+
+        let before = service.character(character_id)?.state().clone();
+
         service
-            .start_concentration(character_id, EffectInstanceId::new())
-            .expect_err("starting concentration on a different instance should fail");
+            .start_concentration(character_id, other.instance_id)
+            .expect_err("starting a different concentration should fail");
+
+        assert_eq!(service.character(character_id)?.state(), &before);
 
         Ok(())
     }
@@ -978,6 +988,34 @@ mod tests {
                 .concentration(),
             None
         );
+
+        Ok(())
+    }
+
+    #[test]
+    fn ending_concentration_removes_effect_and_can_be_repeated() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+
+        service.add_character(test_character_with_effects(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+
+        service.start_concentration(character_id, test_effect_instance_id())?;
+        service.end_concentration(character_id)?;
+
+        let state = service.character(character_id)?.state();
+
+        assert_eq!(state.concentration(), None);
+        assert!(state.effects().effect(test_effect_instance_id()).is_none());
+
+        let before = state.clone();
+
+        service.end_concentration(character_id)?;
+
+        assert_eq!(service.character(character_id)?.state(), &before);
 
         Ok(())
     }

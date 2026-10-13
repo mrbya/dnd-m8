@@ -3,6 +3,12 @@ use crate::{character::ActiveEffects, ActiveConditions, EffectInstanceId, Resour
 use super::hitpoints::HitPointState;
 
 /// Ruleset-independent state that changes while a character is being played.
+///
+/// Ordinary hit points and resource amounts do not exceed their maxima.
+/// Finite active effects always have a positive remaining duration.
+/// Concentration references an active effect on this character.
+/// Character operations clear concentration when its effect is removed
+/// or expires.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CharacterState {
     /// Current hit-point state.
@@ -83,7 +89,7 @@ impl CharacterState {
     }
 
     /// Updates concentration after an aggregate transition validates its target.
-    pub(super) const fn set_concentration(&mut self, concentration: Option<EffectInstanceId>) {
+    pub(crate) const fn set_concentration(&mut self, concentration: Option<EffectInstanceId>) {
         self.concentration = concentration;
     }
 

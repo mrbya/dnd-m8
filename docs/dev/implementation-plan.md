@@ -295,17 +295,19 @@ application-level operations.
   - [x] Hit points and temporary hit points
   - [x] Generic resource pools
   - [x] Active conditions
-  - [ ] Active effects and durations
-  - [ ] Concentration state
-  - [ ] Spell-slot state, only if it is genuinely common at this boundary
+  - [x] Active effects and durations
+  - [x] Concentration state
+  - [x] Evaluate spell-slot state at the common boundary:
+  generic resource pools cover current runtime storage needs;
+  dedicated spellcasting semantics are deferred to Milestone 8.
 - [ ] Define application operations:
   - [x] Take damage
   - [x] Heal
   - [x] Grant or replace temporary hit points
   - [x] Spend and restore a resource
   - [x] Apply and remove a condition
-  - [ ] Apply and remove an effect
-  - [ ] Start, replace, and end concentration
+  - [x] Apply and remove an effect
+  - [x] Start, replace, and end concentration
 - [ ] Define and enforce model invariants.
 - [ ] Return domain events or operation results where useful to the UI.
 - [ ] Add comprehensive unit and property tests for transitions and edge cases.
