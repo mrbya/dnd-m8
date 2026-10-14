@@ -195,6 +195,9 @@ impl Character {
 
     /// Removes one active effect instance.
     ///
+    /// Removing the effect sustained through concentration also clears
+    /// concentration.
+    ///
     /// # Errors
     ///
     /// Returns an error when the effect instance does not exist.
@@ -211,7 +214,10 @@ impl Character {
         Ok(outcome)
     }
 
-    /// Advances duration of one effect instance
+    /// Advances duration of one effect instance.
+    ///
+    /// Expiring the effect sustained through concentration also clears
+    /// concentration.
     ///
     /// # Errors
     ///

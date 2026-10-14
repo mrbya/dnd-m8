@@ -291,7 +291,7 @@ application-level operations.
   reference.
 - [x] Store ruleset-specific character definitions as opaque,
   schema-identified `RulesetCharacterData`.
-- [ ] Model the common runtime state proven necessary by earlier UI work:
+- [x] Model the common runtime state proven necessary by earlier UI work:
   - [x] Hit points and temporary hit points
   - [x] Generic resource pools
   - [x] Active conditions
@@ -300,7 +300,7 @@ application-level operations.
   - [x] Evaluate spell-slot state at the common boundary:
   generic resource pools cover current runtime storage needs;
   dedicated spellcasting semantics are deferred to Milestone 8.
-- [ ] Define application operations:
+- [x] Define application operations:
   - [x] Take damage
   - [x] Heal
   - [x] Grant or replace temporary hit points
@@ -308,17 +308,17 @@ application-level operations.
   - [x] Apply and remove a condition
   - [x] Apply and remove an effect
   - [x] Start, replace, and end concentration
-- [ ] Define and enforce model invariants.
-- [ ] Return domain events or operation results where useful to the UI.
-- [ ] Add comprehensive unit and property tests for transitions and edge cases.
+- [x] Define and enforce model invariants.
+- [x] Return domain events or operation results where useful to the UI.
+- [x] Add comprehensive unit and property tests for transitions and edge cases.
 
 ### Acceptance criteria
 
-- [ ] Runtime state transitions occur through validated operations.
-- [ ] `dnd-m8-core` has no dependency on a concrete ruleset.
-- [ ] Adding a ruleset does not require adding a `Character` enum variant.
-- [ ] Common state is not contaminated with unproven SRD 5.2.1 assumptions.
-- [ ] All project quality gates pass.
+- [x] Runtime state transitions occur through validated operations.
+- [x] `dnd-m8-core` has no dependency on a concrete ruleset.
+- [x] Adding a ruleset does not require adding a `Character` enum variant.
+- [x] Common state is not contaminated with unproven SRD 5.2.1 assumptions.
+- [ ] All project quality gates pass without reported warnings.
 
 ## Milestone 5 — Persistence
 
@@ -588,7 +588,7 @@ evidence:
 | Decision | Target milestone | Current direction |
 | --- | --- | --- |
 | Concrete local persistence | 5 | SQLite + sqlx is favored, but not committed. |
-| Common spell-slot representation | 4/8 | Promote to core only if it proves ruleset-independent. |
+| Common spell-slot representation | 4/8 | Generic resource pools cover current spell-slot storage needs; dedicated spellcasting semantics are deferred to Milestone 8. |
 | Second ruleset implementation | 10 | Minimal SRD 5.1 adapter is the leading candidate. |
 | macOS and iOS support | 12+ | Preserve compatibility; do not block the first release. |
 
@@ -603,6 +603,7 @@ evidence:
 | 2026-09-13 | Bring Storybook into Milestone 2. | UI component iteration is an early project risk and benefits immediately from an isolated visual workbench. |
 | 2026-09-13 | Delay full character creation until the rules and runtime models are proven. | The builder should consume established concepts instead of becoming the accidental center of the arc| 2026-09-29 | Implement workflow-specific UI primitives just in time. | Overlays, form controls, navigation, tooltips, and empty states require concrete interaction and content requirements; implementing them against their first real consumers avoids speculative APIs and incomplete accessibility behavior. |hitecture. |
 | 2026-10-02 | Use `RulesetId` directly as the exact versioned ruleset reference. | A separate `RulesetRef` wrapper would currently carry no additional semantics and can be introduced later if the reference model grows. |
+| 2026-10-14 | Store spell slots in generic resource pools for now. | Generic resource pools cover current spell-slot storage needs. Dedicated spellcasting semantics are deferred to Milestone 8. |
 
 ## Progress log
 
@@ -611,3 +612,4 @@ evidence:
 | 2026-09-13 | 0 | Project workspace and initial quality tooling bootstrapped. |
 | 2026-09-13 | Planning | Living implementation plan created; Milestone 1 is next. |
 | 2026-09-29 | 2 | UI foundation completed with semantic tokens, Mocha and Latte themes, reusable primitives, Storybook documentation, dual-theme accessibility testing, and focused behavioral contracts. |
+| 2026-10-14 | 4 | Core runtime state, validated transitions, duration and concentration lifecycle coverage, and property-based invariant tests completed; milestone completion awaits a warning-free quality gate. |

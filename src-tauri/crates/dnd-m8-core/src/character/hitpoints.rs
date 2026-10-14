@@ -120,6 +120,8 @@ pub struct HealingOutcome {
 
 #[cfg(test)]
 mod tests {
+    use proptest::prelude::*;
+
     use crate::{CoreError, CoreResult, DamageOutcome, HealingOutcome, HitPointState};
     use pretty_assertions::assert_eq;
 
@@ -233,5 +235,66 @@ mod tests {
         assert_eq!(outcome, 8);
 
         Ok(())
+    }
+
+    proptest! {
+        #[test]
+        fn damage_accounts_for_temporary_hit_points_ordinary_hit_points_and_excess(
+            maximum in any::<u32>(),
+            supplied_current in any::<u32>(),
+            temporary in any::<u32>(),
+            requested in any::<u32>(),
+        ) {
+            let current = supplied_current.min(maximum);
+            let mut hit_points = HitPointState::new(current, maximum, temporary)
+                .expect("generated hit-point state should be valid");
+            let outcome = hit_points.take_damage(requested);
+            let temporary_lost = requested.min(temporary);
+            let remaining_damage = requested.saturating_sub(temporary_lost);
+            let hit_points_lost = remaining_damage.min(current);
+            let excess = remaining_damage.saturating_sub(hit_points_lost);
+
+            prop_assert_eq!(outcome.temporary_lost, temporary_lost);
+            prop_assert_eq!(outcome.hit_points_lost, hit_points_lost);
+            prop_assert_eq!(outcome.excess, excess);
+            prop_assert_eq!(
+                u64::from(outcome.temporary_lost)
+                    .saturating_add(u64::from(outcome.hit_points_lost))
+                    .saturating_add(u64::from(outcome.excess)),
+                u64::from(requested),
+            );
+            prop_assert_eq!(
+                hit_points.temporary(),
+                temporary.saturating_sub(temporary_lost),
+            );
+            prop_assert_eq!(
+                hit_points.current(),
+                current.saturating_sub(hit_points_lost),
+            );
+        }
+
+        #[test]
+        fn healing_is_capped_and_accounts_for_restored_and_excess(
+            maximum in any::<u32>(),
+            supplied_current in any::<u32>(),
+            temporary in any::<u32>(),
+            requested in any::<u32>(),
+        ) {
+            let current = supplied_current.min(maximum);
+            let mut hit_points = HitPointState::new(current, maximum, temporary)
+                .expect("generated hit-point state should be valid");
+            let outcome = hit_points.heal(requested);
+            let restored = requested.min(maximum.saturating_sub(current));
+
+            prop_assert_eq!(outcome.restored, restored);
+            prop_assert_eq!(outcome.excess, requested.saturating_sub(restored));
+            prop_assert_eq!(
+                u64::from(outcome.restored).saturating_add(u64::from(outcome.excess)),
+                u64::from(requested),
+            );
+            prop_assert_eq!(hit_points.current(), current.saturating_add(restored));
+            prop_assert!(hit_points.current() <= hit_points.maximum());
+            prop_assert_eq!(hit_points.temporary(), temporary);
+        }
     }
 }

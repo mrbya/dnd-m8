@@ -219,7 +219,10 @@ impl CharacterService {
             .apply_effect(effect_id, duration)
     }
 
-    /// Removes one effect instance frome a managed character.
+    /// Removes one effect instance from a managed character.
+    ///
+    /// Removing the effect sustained through concentration also clears that
+    /// character's concentration.
     ///
     /// # Errors
     ///
@@ -234,6 +237,9 @@ impl CharacterService {
     }
 
     /// Advances the duration of one effect applied to a managed character.
+    ///
+    /// Expiring the effect sustained through concentration also clears that
+    /// character's concentration.
     ///
     /// # Errors
     ///
@@ -302,8 +308,9 @@ mod tests {
     use crate::{
         test::{
             expected_summary, test_character, test_character_id, test_character_with_effects,
-            test_character_with_resources, test_effect_duration, test_effect_instance_id,
-            test_hit_points, test_resource_id, TestRuleset, INVALID_SCHEMA_MESSAGE, TEST_SCHEMA,
+            test_character_with_resources, test_character_with_runtime_state, test_effect_duration,
+            test_effect_instance_id, test_hit_points, test_resource_id, TestRuleset,
+            INVALID_SCHEMA_MESSAGE, TEST_SCHEMA,
         },
         CharacterId, CharacterService, ConditionId, ConditionInstanceId, CoreError, EffectDuration,
         EffectId, EffectInstanceId, ResourceId,
@@ -818,7 +825,7 @@ mod tests {
     fn starting_concentration_references_existing_effect() -> TestResult {
         let (mut service, ruleset_id) = service_with_ruleset()?;
         let character_id = test_character_id();
-        service.add_character(test_character_with_effects(
+        service.add_character(test_character_with_runtime_state(
             character_id,
             ruleset_id,
             TEST_SCHEMA,
@@ -828,20 +835,23 @@ mod tests {
 
         assert_eq!(result.current, Some(test_effect_instance_id()));
 
-        // restarting concentration on same instance is a noop
+        let before = service.character(character_id)?.state().clone();
+
+        // Restarting concentration on the same instance is a no-op.
         result = service.start_concentration(character_id, test_effect_instance_id())?;
 
         assert_eq!(result.current, Some(test_effect_instance_id()));
         assert_eq!(result.removed_effect, None);
+        assert_eq!(service.character(character_id)?.state(), &before);
 
         Ok(())
     }
 
     #[test]
-    fn starting_concentration_on_different_isntance_fails() -> TestResult {
+    fn starting_concentration_on_different_instance_fails_and_preserves_state() -> TestResult {
         let (mut service, ruleset_id) = service_with_ruleset()?;
         let character_id = test_character_id();
-        service.add_character(test_character_with_effects(
+        service.add_character(test_character_with_runtime_state(
             character_id,
             ruleset_id,
             TEST_SCHEMA,
@@ -905,10 +915,10 @@ mod tests {
     }
 
     #[test]
-    fn replacing_concentration_with_missing_preserves_prvious() -> TestResult {
+    fn replacing_concentration_with_missing_preserves_previous_state() -> TestResult {
         let (mut service, ruleset_id) = service_with_ruleset()?;
         let character_id = test_character_id();
-        service.add_character(test_character_with_effects(
+        service.add_character(test_character_with_runtime_state(
             character_id,
             ruleset_id,
             TEST_SCHEMA,
@@ -917,18 +927,13 @@ mod tests {
         let result = service.start_concentration(character_id, test_effect_instance_id())?;
         assert_eq!(result.current, Some(test_effect_instance_id()));
 
+        let before = service.character(character_id)?.state().clone();
+
         service
             .replace_concentration(character_id, EffectInstanceId::new())
             .expect_err("replacing concentration with missing instance should fail");
 
-        assert_eq!(
-            service
-                .character(character_id)
-                .expect("should be present")
-                .state()
-                .concentration(),
-            Some(test_effect_instance_id())
-        );
+        assert_eq!(service.character(character_id)?.state(), &before);
 
         Ok(())
     }
@@ -946,8 +951,10 @@ mod tests {
         let mut result = service.start_concentration(character_id, test_effect_instance_id())?;
         assert_eq!(result.current, Some(test_effect_instance_id()));
 
+        let before = service.character(character_id)?.state().clone();
         result = service.replace_concentration(character_id, test_effect_instance_id())?;
         assert_eq!(result.current, Some(test_effect_instance_id()));
+        assert_eq!(service.character(character_id)?.state(), &before);
 
         assert_eq!(
             service
@@ -965,10 +972,10 @@ mod tests {
     }
 
     #[test]
-    fn ending_effect_removes_concentration() -> TestResult {
+    fn exact_effect_expiration_removes_concentration() -> TestResult {
         let (mut service, ruleset_id) = service_with_ruleset()?;
         let character_id = test_character_id();
-        service.add_character(test_character_with_effects(
+        service.add_character(test_character_with_runtime_state(
             character_id,
             ruleset_id,
             TEST_SCHEMA,
@@ -997,7 +1004,7 @@ mod tests {
         let (mut service, ruleset_id) = service_with_ruleset()?;
         let character_id = test_character_id();
 
-        service.add_character(test_character_with_effects(
+        service.add_character(test_character_with_runtime_state(
             character_id,
             ruleset_id,
             TEST_SCHEMA,
@@ -1010,6 +1017,8 @@ mod tests {
 
         assert_eq!(state.concentration(), None);
         assert!(state.effects().effect(test_effect_instance_id()).is_none());
+        assert_eq!(state.resources().len(), 1);
+        assert_eq!(state.conditions().len(), 1);
 
         let before = state.clone();
 
@@ -1021,7 +1030,7 @@ mod tests {
     }
 
     #[test]
-    fn partial_effect_advancement_perserves_concentration() -> TestResult {
+    fn partial_effect_advancement_preserves_concentration() -> TestResult {
         let (mut service, ruleset_id) = service_with_ruleset()?;
         let character_id = test_character_id();
         service.add_character(test_character_with_effects(
@@ -1052,16 +1061,180 @@ mod tests {
     }
 
     #[test]
+    fn zero_effect_advancement_preserves_concentration_and_state() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_runtime_state(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+        service.start_concentration(character_id, test_effect_instance_id())?;
+        let before = service.character(character_id)?.state().clone();
+
+        let outcome = service.advance_effect_rounds(character_id, test_effect_instance_id(), 0)?;
+
+        assert_eq!(outcome.elapsed_rounds, 0);
+        assert_eq!(service.character(character_id)?.state(), &before);
+
+        Ok(())
+    }
+
+    #[test]
+    fn overshoot_effect_expiration_removes_concentration() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_effects(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+        service.start_concentration(character_id, test_effect_instance_id())?;
+
+        let outcome =
+            service.advance_effect_rounds(character_id, test_effect_instance_id(), u32::MAX)?;
+        let state = service.character(character_id)?.state();
+
+        assert_eq!(outcome.remaining_duration, None);
+        assert_eq!(state.concentration(), None);
+        assert!(state.effects().effect(test_effect_instance_id()).is_none());
+
+        Ok(())
+    }
+
+    #[test]
+    fn removing_concentrated_effect_clears_concentration() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_runtime_state(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+        service.start_concentration(character_id, test_effect_instance_id())?;
+
+        service.remove_effect(character_id, test_effect_instance_id())?;
+
+        let state = service.character(character_id)?.state();
+        assert_eq!(state.concentration(), None);
+        assert!(state.effects().effect(test_effect_instance_id()).is_none());
+        assert_eq!(state.resources().len(), 1);
+        assert_eq!(state.conditions().len(), 1);
+
+        Ok(())
+    }
+
+    #[test]
+    fn unrelated_effect_removal_and_expiration_preserve_concentration() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_runtime_state(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+        service.start_concentration(character_id, test_effect_instance_id())?;
+        let removable = service
+            .apply_effect(
+                character_id,
+                EffectId::new("effect.removable")?,
+                EffectDuration::UntilRemoved,
+            )?
+            .instance_id;
+        let expiring = service
+            .apply_effect(
+                character_id,
+                EffectId::new("effect.expiring")?,
+                EffectDuration::rounds(1)?,
+            )?
+            .instance_id;
+
+        service.remove_effect(character_id, removable)?;
+        service.advance_effect_rounds(character_id, expiring, 1)?;
+
+        let state = service.character(character_id)?.state();
+        assert_eq!(state.concentration(), Some(test_effect_instance_id()));
+        assert!(state.effects().effect(test_effect_instance_id()).is_some());
+        assert!(state.effects().effect(removable).is_none());
+        assert!(state.effects().effect(expiring).is_none());
+
+        Ok(())
+    }
+
+    #[test]
+    fn replacing_absent_concentration_starts_without_removing_effects() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_runtime_state(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+        let target = service
+            .apply_effect(
+                character_id,
+                EffectId::new("effect.target")?,
+                EffectDuration::UntilRemoved,
+            )?
+            .instance_id;
+
+        let outcome = service.replace_concentration(character_id, target)?;
+        let state = service.character(character_id)?.state();
+
+        assert_eq!(outcome.previous, None);
+        assert_eq!(outcome.current, Some(target));
+        assert_eq!(outcome.removed_effect, None);
+        assert_eq!(state.concentration(), Some(target));
+        assert!(state.effects().effect(test_effect_instance_id()).is_some());
+        assert!(state.effects().effect(target).is_some());
+
+        Ok(())
+    }
+
+    #[test]
+    fn same_effect_instances_remain_independent_through_service() -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character(character_id, ruleset_id, TEST_SCHEMA)?)?;
+        let effect_id = EffectId::new("effect.repeated")?;
+        let first = service
+            .apply_effect(character_id, effect_id.clone(), EffectDuration::rounds(2)?)?
+            .instance_id;
+        let second = service
+            .apply_effect(character_id, effect_id.clone(), EffectDuration::rounds(4)?)?
+            .instance_id;
+
+        service.advance_effect_rounds(character_id, first, 2)?;
+        let effects = service.character(character_id)?.state().effects();
+
+        assert!(effects.effect(first).is_none());
+        assert_eq!(effects.instance_count(&effect_id), 1);
+        assert_eq!(
+            effects
+                .effect(second)
+                .expect("second instance should remain")
+                .duration(),
+            EffectDuration::rounds(4)?,
+        );
+
+        Ok(())
+    }
+
+    #[test]
     fn concentration_on_effect_belonging_to_another_character_is_rejected() -> TestResult {
         let (mut service, ruleset_id) = service_with_ruleset()?;
         let character_id1 = test_character_id();
         let character_id2 = CharacterId::new();
-        service.add_character(test_character_with_effects(
+        service.add_character(test_character_with_runtime_state(
             character_id1,
             ruleset_id.clone(),
             TEST_SCHEMA,
         )?)?;
-        service.add_character(test_character(character_id2, ruleset_id, TEST_SCHEMA)?)?;
+        service.add_character(test_character_with_runtime_state(
+            character_id2,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
         let id = service
             .apply_effect(
                 character_id2,
@@ -1070,9 +1243,43 @@ mod tests {
             )?
             .instance_id;
 
+        let before_first = service.character(character_id1)?.state().clone();
+        let before_second = service.character(character_id2)?.state().clone();
+
         service
             .start_concentration(character_id1, id)
             .expect_err("concentration on effect instance not belonging to character should fail");
+
+        assert_eq!(service.character(character_id1)?.state(), &before_first);
+        assert_eq!(service.character(character_id2)?.state(), &before_second);
+
+        Ok(())
+    }
+
+    #[test]
+    fn concentration_operations_reject_unknown_character_without_mutating_managed_character(
+    ) -> TestResult {
+        let (mut service, ruleset_id) = service_with_ruleset()?;
+        let character_id = test_character_id();
+        service.add_character(test_character_with_runtime_state(
+            character_id,
+            ruleset_id,
+            TEST_SCHEMA,
+        )?)?;
+        let before = service.character(character_id)?.state().clone();
+        let unknown_character_id = CharacterId::new();
+
+        service
+            .start_concentration(unknown_character_id, test_effect_instance_id())
+            .expect_err("unknown character should be rejected when starting concentration");
+        service
+            .replace_concentration(unknown_character_id, test_effect_instance_id())
+            .expect_err("unknown character should be rejected when replacing concentration");
+        service
+            .end_concentration(unknown_character_id)
+            .expect_err("unknown character should be rejected when ending concentration");
+
+        assert_eq!(service.character(character_id)?.state(), &before);
 
         Ok(())
     }

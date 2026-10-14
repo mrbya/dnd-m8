@@ -6,8 +6,9 @@ use serde_json::{json, Value};
 use uuid::Uuid;
 
 use crate::{
-    ActiveEffect, Character, CharacterId, CharacterState, CharacterSummary, CoreResult,
-    EffectDuration, EffectId, EffectInstanceId, HitPointState, ResourceId, ResourcePool,
+    ActiveEffect, Character, CharacterId, CharacterState, CharacterSummary, ConditionId,
+    CoreResult, EffectDuration, EffectId, EffectInstanceId, HitPointState, ResourceId,
+    ResourcePool,
 };
 
 /// Schema understood by [`TestRuleset`].
@@ -141,6 +142,32 @@ pub fn test_character_with_effects(
     schema: &str,
 ) -> CoreResult<Character> {
     let mut state = CharacterState::new(test_hit_points()?);
+    state.effects_mut().insert(test_effect()?)?;
+
+    Ok(Character::new(
+        id,
+        ruleset_id,
+        RulesetCharacterData::new(
+            schema,
+            json!({
+                "name": TEST_CHARACTER_NAME,
+            }),
+        ),
+        state,
+    ))
+}
+
+/// Constructs a test character with independent runtime state for preservation tests.
+pub fn test_character_with_runtime_state(
+    id: CharacterId,
+    ruleset_id: RulesetId,
+    schema: &str,
+) -> CoreResult<Character> {
+    let mut state = CharacterState::new(test_hit_points()?);
+    state.resources_mut().insert(test_resource()?)?;
+    state
+        .conditions_mut()
+        .apply(ConditionId::new("condition.fixture")?)?;
     state.effects_mut().insert(test_effect()?)?;
 
     Ok(Character::new(

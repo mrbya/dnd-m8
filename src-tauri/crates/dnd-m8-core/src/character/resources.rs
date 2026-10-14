@@ -252,6 +252,8 @@ impl ResourcePools {
 
 #[cfg(test)]
 mod tests {
+    use proptest::prelude::*;
+
     use crate::{CoreResult, ResourceId, ResourcePool, ResourcePools};
     use pretty_assertions::assert_eq;
 
@@ -372,5 +374,72 @@ mod tests {
         }
 
         Ok(())
+    }
+
+    proptest! {
+        #[test]
+        fn restoration_is_capped_and_accounts_for_restored_and_excess(
+            maximum in any::<u32>(),
+            supplied_current in any::<u32>(),
+            requested in any::<u32>(),
+        ) {
+            let current = supplied_current.min(maximum);
+            let id = ResourceId::new("test resource")
+                .expect("static resource id should be valid");
+            let mut resource = ResourcePool::new(id, current, maximum)
+                .expect("generated resource pool should be valid");
+            let outcome = resource.restore(requested);
+            let restored = requested.min(maximum.saturating_sub(current));
+
+            prop_assert_eq!(outcome.restored, restored);
+            prop_assert_eq!(outcome.excess, requested.saturating_sub(restored));
+            prop_assert_eq!(
+                u64::from(outcome.restored).saturating_add(u64::from(outcome.excess)),
+                u64::from(requested),
+            );
+            prop_assert_eq!(resource.current(), current.saturating_add(restored));
+            prop_assert!(resource.current() <= resource.maximum());
+        }
+
+        #[test]
+        fn successful_spending_subtracts_exactly_the_requested_amount(
+            maximum in any::<u32>(),
+            supplied_current in any::<u32>(),
+            supplied_requested in any::<u32>(),
+        ) {
+            let current = supplied_current.min(maximum);
+            let requested = supplied_requested.min(current);
+            let id = ResourceId::new("test resource")
+                .expect("static resource id should be valid");
+            let mut resource = ResourcePool::new(id, current, maximum)
+                .expect("generated resource pool should be valid");
+            let outcome = resource.spend(requested)
+                .expect("generated request should not exceed the available resource");
+
+            prop_assert_eq!(outcome.spent, requested);
+            prop_assert_eq!(outcome.previous, current);
+            prop_assert_eq!(outcome.current, current.saturating_sub(requested));
+            prop_assert_eq!(resource.current(), current.saturating_sub(requested));
+        }
+
+        #[test]
+        fn rejected_overspending_preserves_resource_state(
+            supplied_current in 0_u32..u32::MAX,
+            supplied_maximum in any::<u32>(),
+        ) {
+            let current = supplied_current;
+            let maximum = supplied_maximum.max(current);
+            let requested = current.saturating_add(1);
+            let id = ResourceId::new("test resource")
+                .expect("static resource id should be valid");
+            let mut resource = ResourcePool::new(id, current, maximum)
+                .expect("generated resource pool should be valid");
+            let before = resource.clone();
+
+            resource.spend(requested)
+                .expect_err("request above current amount should be rejected");
+
+            prop_assert_eq!(resource, before);
+        }
     }
 }
