@@ -1,4 +1,7 @@
-use crate::{character::ActiveEffects, ActiveConditions, EffectInstanceId, ResourcePools};
+use crate::{
+    character::ActiveEffects, ActiveConditions, CoreError, CoreResult, EffectInstanceId,
+    ResourcePools,
+};
 
 use super::hitpoints::HitPointState;
 
@@ -34,6 +37,38 @@ impl CharacterState {
             effects: ActiveEffects::new(),
             concentration: None,
         }
+    }
+
+    /// Reconstructs complete character runtime state from validated parts.
+    ///
+    /// Existing condition and effect instance identifiers are preserved.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`CoreError::EffectInstanceNotFound`] when concentration
+    /// references an effect absent from the supplied collection.
+    pub fn from_parts(
+        hit_points: HitPointState,
+        resources: ResourcePools,
+        conditions: ActiveConditions,
+        effects: ActiveEffects,
+        concentration: Option<EffectInstanceId>,
+    ) -> CoreResult<Self> {
+        if let Some(instance_id) = concentration {
+            if effects.effect(instance_id).is_none() {
+                return Err(Box::new(CoreError::EffectInstanceNotFound {
+                    id: instance_id,
+                }));
+            }
+        }
+
+        Ok(Self {
+            hit_points,
+            resources,
+            conditions,
+            effects,
+            concentration,
+        })
     }
 
     /// Constructs character runtime state with preconfigured resource pools.
