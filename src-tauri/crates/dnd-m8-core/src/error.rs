@@ -6,6 +6,9 @@ use crate::{CharacterId, ConditionInstanceId, EffectInstanceId, ResourceId};
 /// Result type alias used by core API.
 pub type CoreResult<T> = std::result::Result<T, Box<CoreError>>;
 
+/// Result type alias used by character persistence API.
+pub type PersistenceResult<T> = std::result::Result<T, PersistenceError>;
+
 /// D&D Mate Core API errors.
 #[derive(Debug, Error)]
 pub enum CoreError {
@@ -142,5 +145,40 @@ pub enum CoreError {
     ConcentrationAlreadyActive {
         /// Effect instance currently sustained through concentration.
         current: EffectInstanceId,
+    },
+}
+
+/// Failure to encode or reconstruct a saved character.
+#[derive(Debug, Error)]
+pub enum PersistenceError {
+    /// Saved JSON could not be encoded or decoded.
+    #[error("saved character JSON could not be processed: {source}")]
+    Json {
+        /// Underlying JSON error.
+        #[from]
+        source: serde_json::Error,
+    },
+
+    /// The saved format is unsupported by this application.
+    #[error("saved character format version `{version}` is unsupported")]
+    UnsupportedVersion {
+        /// Encountered format version.
+        version: u32,
+    },
+
+    /// The saved ruleset identity is invalid.
+    #[error("saved character ruleset identity is invalid: {source}")]
+    InvalidRuleset {
+        /// Underlying ruleset identity error.
+        #[from]
+        source: RulesetError,
+    },
+
+    /// The saved runtime state violates a domain invariant.
+    #[error("saved character runtime state is invalid: {source}")]
+    InvalidState {
+        /// Underlying domain validation error.
+        #[from]
+        source: Box<CoreError>,
     },
 }

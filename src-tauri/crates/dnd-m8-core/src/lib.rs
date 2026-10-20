@@ -67,6 +67,8 @@
 pub(crate) mod character;
 /// Core API error types.
 pub(crate) mod error;
+/// Versioned character persistence format.
+pub(crate) mod persistence;
 /// Character service.
 pub(crate) mod service;
 /// App state.
@@ -82,7 +84,8 @@ pub use character::{
     InstanceId, Instances, ResourceId, ResourcePool, ResourcePools, ResourceRestoreOutcome,
     ResourceSpendOutcome,
 };
-pub use error::{CoreError, CoreResult};
+pub use error::{CoreError, CoreResult, PersistenceError, PersistenceResult};
+pub use persistence::{decode_character, encode_character};
 pub use service::CharacterService;
 pub use state::AppState;
 

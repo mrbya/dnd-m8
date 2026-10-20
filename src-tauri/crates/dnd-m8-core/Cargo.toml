@@ -10,6 +10,8 @@ license.workspace           = true
 dnd-m8-ruleset.workspace    = true
 thiserror.workspace         = true
 uuid.workspace              = true
+serde.workspace             = true
+serde_json.workspace        = true
 
 [dev-dependencies]
 pretty_assertions.workspace = true
