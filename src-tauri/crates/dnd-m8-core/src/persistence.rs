@@ -325,3 +325,286 @@ impl DurationRecord {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::error::Error;
+
+    use dnd_m8_ruleset::{RulesetCharacterData, RulesetId};
+    use serde_json::{json, Value};
+    use uuid::Uuid;
+
+    use crate::{
+        decode_character, encode_character, ActiveCondition, ActiveConditions, ActiveEffect,
+        ActiveEffects, Character, CharacterId, CharacterState, ConditionId, ConditionInstanceId,
+        EffectDuration, EffectId, EffectInstanceId, HitPointState, PersistenceError, ResourceId,
+        ResourcePool, ResourcePools,
+    };
+
+    type TestResult<T = ()> = Result<T, Box<dyn Error>>;
+
+    fn character_with_complete_runtime_state() -> TestResult<Character> {
+        let character_id = CharacterId::from_uuid(Uuid::from_u128(1));
+        let ruleset_id = RulesetId::new("org.dnd-m8.persistence-test", "1.2.3")?;
+        let ruleset_data = RulesetCharacterData::new(
+            "org.dnd-m8.persistence-test.character@1",
+            json!({
+                "name": "Persistence Test",
+                "spellbook": {
+                    "prepared": ["spell.example"],
+                    "metadata": { "source": "fixture" },
+                },
+            }),
+        );
+        let hit_points = HitPointState::new(17, 23, 5)?;
+
+        let mut resources = ResourcePools::new();
+        resources.insert(ResourcePool::new(ResourceId::new("resource.first")?, 2, 3)?)?;
+        resources.insert(ResourcePool::new(
+            ResourceId::new("resource.second")?,
+            4,
+            7,
+        )?)?;
+
+        let condition_id = ConditionId::new("condition.repeated")?;
+        let mut conditions = ActiveConditions::new();
+        conditions.insert(ActiveCondition::from_parts(
+            ConditionInstanceId::from_uuid(Uuid::from_u128(10)),
+            condition_id.clone(),
+        ))?;
+        conditions.insert(ActiveCondition::from_parts(
+            ConditionInstanceId::from_uuid(Uuid::from_u128(11)),
+            condition_id,
+        ))?;
+
+        let concentrated_effect_id = EffectInstanceId::from_uuid(Uuid::from_u128(20));
+        let mut effects = ActiveEffects::new();
+        effects.insert(ActiveEffect::from_parts(
+            concentrated_effect_id,
+            EffectId::new("effect.finite")?,
+            EffectDuration::rounds(3)?,
+        ))?;
+        effects.insert(ActiveEffect::from_parts(
+            EffectInstanceId::from_uuid(Uuid::from_u128(21)),
+            EffectId::new("effect.indefinite")?,
+            EffectDuration::UntilRemoved,
+        ))?;
+
+        let state = CharacterState::from_parts(
+            hit_points,
+            resources,
+            conditions,
+            effects,
+            Some(concentrated_effect_id),
+        )?;
+
+        Ok(Character::new(
+            character_id,
+            ruleset_id,
+            ruleset_data,
+            state,
+        ))
+    }
+
+    fn encoded_value(character: &Character) -> TestResult<Value> {
+        Ok(serde_json::from_str(&encode_character(character)?)?)
+    }
+
+    fn decode_value(value: &Value) -> Result<Character, PersistenceError> {
+        decode_character(&serde_json::to_string(value).expect("fixture JSON should serialize"))
+    }
+
+    fn field_mut<'a>(value: &'a mut Value, pointer: &str) -> &'a mut Value {
+        value
+            .pointer_mut(pointer)
+            .expect("encoded fixture should contain the requested field")
+    }
+
+    #[test]
+    fn round_trip_preserves_complete_runtime_state() -> TestResult {
+        let original = character_with_complete_runtime_state()?;
+        let restored = decode_character(&encode_character(&original)?)?;
+
+        assert_eq!(restored.id(), original.id());
+        assert_eq!(restored.ruleset_id(), original.ruleset_id());
+        assert_eq!(restored.ruleset_data(), original.ruleset_data());
+        assert_eq!(restored.state(), original.state());
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_hit_points_above_maximum() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        *field_mut(&mut saved, "/character/state/hit_points/current") = json!(24);
+
+        decode_value(&saved).expect_err("hit points above their maximum should be rejected");
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_resource_amount_above_maximum() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        *field_mut(&mut saved, "/character/state/resources/0/current") = json!(4);
+
+        decode_value(&saved).expect_err("resource amount above its maximum should be rejected");
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_duplicate_resource_identifier() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        let duplicate = saved
+            .pointer("/character/state/resources/0")
+            .expect("encoded fixture should contain a resource")
+            .clone();
+        field_mut(&mut saved, "/character/state/resources")
+            .as_array_mut()
+            .expect("resources should be an array")
+            .push(duplicate);
+
+        decode_value(&saved).expect_err("duplicate resource should be rejected");
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_duplicate_condition_instance_identifier() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        let duplicate = saved
+            .pointer("/character/state/conditions/0")
+            .expect("encoded fixture should contain a condition")
+            .clone();
+        field_mut(&mut saved, "/character/state/conditions")
+            .as_array_mut()
+            .expect("conditions should be an array")
+            .push(duplicate);
+
+        decode_value(&saved).expect_err("duplicate condition instance should be rejected");
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_duplicate_effect_instance_identifier() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        let duplicate = saved
+            .pointer("/character/state/effects/0")
+            .expect("encoded fixture should contain an effect")
+            .clone();
+        field_mut(&mut saved, "/character/state/effects")
+            .as_array_mut()
+            .expect("effects should be an array")
+            .push(duplicate);
+
+        decode_value(&saved).expect_err("duplicate effect instance should be rejected");
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_zero_finite_duration() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        *field_mut(&mut saved, "/character/state/effects/0/duration/remaining") = json!(0);
+
+        decode_value(&saved).expect_err("zero finite duration should be rejected");
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_concentration_on_missing_effect() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        *field_mut(&mut saved, "/character/state/concentration") = json!(Uuid::from_u128(99));
+
+        decode_value(&saved).expect_err("concentration on a missing effect should be rejected");
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_invalid_character_uuid() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        *field_mut(&mut saved, "/character/id") = json!("not-a-uuid");
+
+        decode_value(&saved).expect_err("invalid character UUID should be rejected");
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_invalid_ruleset_version() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        *field_mut(&mut saved, "/character/ruleset/version") = json!("not-a-version");
+
+        decode_value(&saved).expect_err("invalid ruleset version should be rejected");
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_unknown_duration_kind() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        *field_mut(&mut saved, "/character/state/effects/0/duration/kind") = json!("turns");
+
+        decode_value(&saved).expect_err("unknown duration kind should be rejected");
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_unknown_application_owned_state_field() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        let state = field_mut(&mut saved, "/character/state")
+            .as_object_mut()
+            .expect("state should be an object");
+        state.insert(String::from("unknown"), json!(true));
+
+        decode_value(&saved).expect_err("unknown application-owned state field should be rejected");
+
+        Ok(())
+    }
+
+    #[test]
+    fn rejects_future_version_before_reading_its_payload() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        *field_mut(&mut saved, "/format_version") = json!(2);
+        *field_mut(&mut saved, "/character") = json!({ "unfamiliar": true });
+
+        let error = decode_value(&saved).expect_err("future format version should be rejected");
+
+        assert!(matches!(
+            error,
+            PersistenceError::UnsupportedVersion { version: 2 }
+        ));
+
+        Ok(())
+    }
+
+    #[test]
+    fn reconstructs_character_with_unavailable_ruleset() -> TestResult {
+        let mut saved = encoded_value(&character_with_complete_runtime_state()?)?;
+        *field_mut(&mut saved, "/character/ruleset/family") = json!("org.example.unavailable");
+        *field_mut(&mut saved, "/character/ruleset/version") = json!("9.8.7");
+
+        let restored = decode_value(&saved)?;
+        let expected_ruleset = RulesetId::new("org.example.unavailable", "9.8.7")?;
+
+        assert_eq!(restored.ruleset_id(), &expected_ruleset);
+
+        Ok(())
+    }
+
+    #[test]
+    fn preserves_nested_opaque_ruleset_json() -> TestResult {
+        let original = character_with_complete_runtime_state()?;
+        let expected_data = original.ruleset_data().data().clone();
+        let restored = decode_character(&encode_character(&original)?)?;
+
+        assert_eq!(restored.ruleset_data().data(), &expected_data);
+
+        Ok(())
+    }
+}
