@@ -69,6 +69,8 @@ pub(crate) mod character;
 pub(crate) mod error;
 /// Versioned character persistence format.
 pub(crate) mod persistence;
+/// Character repository contracts and implementations.
+pub(crate) mod repository;
 /// Character service.
 pub(crate) mod service;
 /// App state.
@@ -86,6 +88,7 @@ pub use character::{
 };
 pub use error::{CoreError, CoreResult, PersistenceError, PersistenceResult};
 pub use persistence::{decode_character, encode_character};
+pub use repository::{CharacterRepository, InMemoryCharacterRepository};
 pub use service::CharacterService;
 pub use state::AppState;
 

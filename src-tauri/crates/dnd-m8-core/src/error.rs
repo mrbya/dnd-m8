@@ -181,4 +181,18 @@ pub enum PersistenceError {
         #[from]
         source: Box<CoreError>,
     },
+
+    /// Creating a stored character would replace an existing record.
+    #[error("stored character `{id}` already exists")]
+    CharacterAlreadyExists {
+        /// Existing character identifier.
+        id: CharacterId,
+    },
+
+    /// The requested stored character does not exist.
+    #[error("stored character `{id}` was not found")]
+    CharacterNotFound {
+        /// Missing character identifier.
+        id: CharacterId,
+    },
 }
